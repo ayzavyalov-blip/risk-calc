@@ -5,55 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Клинический калькулятор риска преэклампсии и задержки роста плода (CDSS)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        /* Настройка шрифтов и цветов согласно Варианту A */
+        body { font-family: 'Montserrat', sans-serif; background-color: #F9FAFB; color: #111827; }
+        
+        /* Скроллбар */
         .overflow-y-auto::-webkit-scrollbar { width: 6px; }
         .overflow-y-auto::-webkit-scrollbar-track { background: #f1f5f9; }
         .overflow-y-auto::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .active-mode { border-color: #4f46e5; background-color: #eef2ff; color: #4338ca; border-width: 2px; }
+
+        /* Активный режим кнопок (Синий акцент) */
+        .active-mode { 
+            border-color: #3B82F6; 
+            background-color: #EFF6FF; 
+            color: #1D4ED8; 
+            border-width: 2px; 
+        }
+
+        /* Модальные окна */
         .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 3% auto; padding: 25px; border: 1px solid #888; width: 90%; max-width: 800px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-        @keyframes pulse-blue { 0%, 100% { background-color: #eff6ff; } 50% { background-color: #dbeafe; } }
+        .modal-content { background-color: #ffffff; margin: 3% auto; padding: 25px; border: 1px solid #E5E7EB; width: 90%; max-width: 800px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+
+        /* Анимации */
+        @keyframes pulse-blue { 0%, 100% { background-color: #EFF6FF; } 50% { background-color: #DBEAFE; } }
         .loading-mis { animation: pulse-blue 1.5s infinite; }
-        .recommended-action { border-color: #4f46e5; background-color: #f5f3ff; box-shadow: 0 0 0 1px #4f46e5; }
         .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Стилизация inputs при фокусе */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 1px #3B82F6;
+        }
     </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8 h-screen overflow-hidden text-gray-900 font-sans text-[13px]">
+<body class="p-4 md:p-8 h-screen overflow-hidden text-[13px]">
 
     <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col h-full border border-gray-200">
         
         <div class="p-5 border-b border-gray-200 bg-white text-center">
-            <h1 class="text-xl font-bold text-gray-900 uppercase tracking-wide">
+            <h1 class="text-xl font-bold text-[#111827] uppercase tracking-wide">
                 Клинический калькулятор риска преэклампсии и задержки роста плода
-                <span class="block text-sm font-normal normal-case text-gray-500 mt-1">
+                <span class="block text-sm font-normal normal-case text-[#6B7280] mt-1">
                     Система поддержки принятия врачебных решений (CDSS) на основе ансамблевых моделей машинного обучения
                 </span>
             </h1>
         </div>
         
-        <header class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+        <header class="px-6 py-4 border-b border-gray-200 bg-[#F9FAFB] flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm flex-1 w-full text-[12px]">
                 <div class="space-y-1">
-                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">ФИО Пациентки:</label>
-                    <input type="text" id="header-name" value="Иванова Мария Ивановна" class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-bold text-gray-800 py-0.5">
+                    <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">ФИО Пациентки:</label>
+                    <input type="text" id="header-name" value="Иванова Мария Ивановна" class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 font-bold text-[#111827] py-0.5">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">Срок (нед. дн.):</label>
-                    <input type="text" id="header-weeks" value="12 нед. 3 дня" class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-bold text-gray-800 py-0.5">
+                    <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">Срок (нед. дн.):</label>
+                    <input type="text" id="header-weeks" value="12 нед. 3 дня" class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 font-bold text-[#111827] py-0.5">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">Врач (ФИО):</label>
-                    <input type="text" id="header-doctor" value="Петров В.В." class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-bold text-gray-800 py-0.5">
+                    <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">Врач (ФИО):</label>
+                    <input type="text" id="header-doctor" value="Петров В.В." class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 font-bold text-[#111827] py-0.5">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">ID ПроМед/ЕЦП:</label>
-                    <input type="text" id="header-id" value="7701-12345678" class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-medium text-gray-800 py-0.5">
+                    <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">ID ПроМед/ЕЦП:</label>
+                    <input type="text" id="header-id" value="7701-12345678" class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 font-medium text-[#111827] py-0.5">
                 </div>
             </div>
             <div class="flex gap-2 w-full md:w-auto">
-                <button id="import-mis" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black py-2.5 px-4 rounded-lg uppercase transition flex items-center justify-center gap-2 shadow-sm">
+                <button id="import-mis" class="flex-1 md:flex-none bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-black py-2.5 px-4 rounded-lg uppercase transition flex items-center justify-center gap-2 shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                     Импорт из МИС
                 </button>
@@ -64,61 +85,61 @@
             <div id="input-column" class="w-full md:w-5/12 p-6 border-r border-gray-200 overflow-y-auto bg-white transition-colors duration-300">
                 <form id="ml-input-form" class="space-y-6">
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center border-b-2 border-indigo-100 pb-1">
-                            <h3 class="font-bold text-indigo-700 text-sm uppercase tracking-wider">Клинико-анамнестические данные</h3>
+                        <div class="flex justify-between items-center border-b-2 border-blue-100 pb-1">
+                            <h3 class="font-bold text-[#3B82F6] text-sm uppercase tracking-wider">Клинико-анамнестические данные</h3>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Возраст матери</label><input type="number" id="inp-age" value="35" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm focus:ring-indigo-500"></div>
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Число родов (паритет)</label><input type="number" id="inp-parity" value="1" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm focus:ring-indigo-500"></div>
+                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Возраст матери</label><input type="number" id="inp-age" value="35" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
+                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Число родов (паритет)</label><input type="number" id="inp-parity" value="1" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
                             <div class="col-span-2">
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Интергравидарный интервал</label>
-                                <select id="inp-interval" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>От 6 до 60 месяцев</option><option>Менее 6 месяцев</option><option>Более 60 месяцев</option></select>
+                                <label class="block text-xs font-bold text-[#6B7280] mb-1">Интергравидарный интервал</label>
+                                <select id="inp-interval" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>От 6 до 60 месяцев</option><option>Менее 6 месяцев</option><option>Более 60 месяцев</option></select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">ПЭ в анамнезе</label>
-                                <select id="inp-pe-hist" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Нет</option><option>Да</option></select>
+                                <label class="block text-xs font-bold text-[#6B7280] mb-1">ПЭ в анамнезе</label>
+                                <select id="inp-pe-hist" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Нет</option><option>Да</option></select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">ЗРП в анамнезе</label>
-                                <select id="inp-fgr-hist" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Нет</option><option>Да</option></select>
+                                <label class="block text-xs font-bold text-[#6B7280] mb-1">ЗРП в анамнезе</label>
+                                <select id="inp-fgr-hist" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Нет</option><option>Да</option></select>
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-4">
-                        <h3 class="font-bold text-indigo-700 border-b-2 border-indigo-100 pb-1 text-sm uppercase tracking-wider">Соматический статус</h3>
+                        <h3 class="font-bold text-[#3B82F6] border-b-2 border-blue-100 pb-1 text-sm uppercase tracking-wider">Соматический статус</h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Хроническая АГ</label><select id="inp-hag" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Да</option><option>Нет</option></select></div>
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Болезни почек</label><select id="inp-kidney" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Нет</option><option>Да</option></select></div>
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">ИМТ до бер-ти</label><input type="text" id="inp-bmi" value="31.2" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"></div>
+                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Хроническая АГ</label><select id="inp-hag" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Да</option><option>Нет</option></select></div>
+                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Болезни почек</label><select id="inp-kidney" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Нет</option><option>Да</option></select></div>
+                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">ИМТ до бер-ти</label><input type="text" id="inp-bmi" value="31.2" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Прибавка массы тела</label>
-                                <select id="inp-gain" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Меньше рекомендуемой нормы</option><option>Соответствует норме</option><option>Больше рекомендуемой нормы</option></select>
+                                <label class="block text-xs font-bold text-[#6B7280] mb-1">Прибавка массы тела</label>
+                                <select id="inp-gain" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Меньше рекомендуемой нормы</option><option>Соответствует норме</option><option>Больше рекомендуемой нормы</option></select>
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-4 pb-24">
-                        <h3 class="font-bold text-indigo-700 border-b-2 border-indigo-100 pb-1 text-sm uppercase tracking-wider">Скрининг I триместра и образ жизни</h3>
+                        <h3 class="font-bold text-[#3B82F6] border-b-2 border-blue-100 pb-1 text-sm uppercase tracking-wider">Скрининг I триместра и образ жизни</h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Риск ПЭ (скрининг)</label><input type="text" id="inp-scr-pe" placeholder="Напр. 1:150" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"></div>
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Риск ЗРП (скрининг)</label><input type="text" id="inp-scr-fgr" placeholder="Напр. 1:80" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"></div>
+                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Риск ПЭ (скрининг)</label><input type="text" id="inp-scr-pe" placeholder="Напр. 1:150" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
+                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Риск ЗРП (скрининг)</label><input type="text" id="inp-scr-fgr" placeholder="Напр. 1:80" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
                             <div class="col-span-2">
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Статус курения</label>
-                                <select id="inp-smoking" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Курит</option><option>Не курит</option><option>Бросила</option></select>
+                                <label class="block text-xs font-bold text-[#6B7280] mb-1">Статус курения</label>
+                                <select id="inp-smoking" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Курит</option><option>Не курит</option><option>Бросила</option></select>
                             </div>
                         </div>
                     </div>
 
                     <div class="pt-6 border-t sticky bottom-0 bg-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
                         <div class="mb-4">
-                            <label class="block text-xs font-black text-gray-800 mb-2 uppercase text-[11px] tracking-tighter">Режим работы клинических порогов:</label>
+                            <label class="block text-xs font-black text-[#111827] mb-2 uppercase text-[11px] tracking-tighter">Режим работы клинических порогов:</label>
                             <div class="grid grid-cols-2 gap-3">
-                                <button type="button" id="mode-screening" class="py-2.5 px-2 text-[10px] font-black border rounded-lg uppercase transition active-mode leading-tight">Скрининговый режим<br><span class="font-medium normal-case text-gray-500">Женская консультация</span></button>
-                                <button type="button" id="mode-tactical" class="py-2.5 px-2 text-[10px] font-black border border-gray-300 rounded-lg uppercase text-gray-500 transition hover:bg-gray-50 leading-tight">Тактический режим<br><span class="font-medium normal-case text-gray-500">Акушерский стационар</span></button>
+                                <button type="button" id="mode-screening" class="py-2.5 px-2 text-[10px] font-black border rounded-lg uppercase transition active-mode leading-tight">Скрининговый режим<br><span class="font-medium normal-case text-[#6B7280]">Женская консультация</span></button>
+                                <button type="button" id="mode-tactical" class="py-2.5 px-2 text-[10px] font-black border border-gray-300 rounded-lg uppercase text-[#6B7280] transition hover:bg-gray-50 leading-tight">Тактический режим<br><span class="font-medium normal-case text-[#6B7280]">Акушерский стационар</span></button>
                             </div>
                         </div>
-                        <button id="calc-trigger" type="button" class="w-full py-4 bg-indigo-600 text-white font-black rounded-xl shadow-lg hover:bg-indigo-700 transition uppercase tracking-widest text-sm flex items-center justify-center gap-3">
+                        <button id="calc-trigger" type="button" class="w-full py-4 bg-[#3B82F6] text-white font-black rounded-xl shadow-lg hover:bg-[#2563EB] transition uppercase tracking-widest text-sm flex items-center justify-center gap-3">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h3m-3-10h.01M9 17h.01M12 17h.01M15 17h.01M9 14h.01M12 14h.01M15 14h.01M9 11h.01M12 11h.01M15 11h.01M12 4a1 1 0 011 1v1a1 1 0 01-2 0V5a1 1 0 011-1z"></path></svg>
                             Рассчитать клинический риск
                         </button>
@@ -126,17 +147,17 @@
                 </form>
             </div>
 
-            <div class="w-full md:w-7/12 p-6 bg-gray-50 overflow-y-auto" id="right-panel">
+            <div class="w-full md:w-7/12 p-6 bg-[#F9FAFB] overflow-y-auto" id="right-panel">
                 
-                <div id="results-empty" class="h-full flex flex-col items-center justify-center text-slate-400 text-center px-10">
-                    <div class="bg-white p-10 rounded-3xl shadow-sm border border-slate-100">
-                        <svg class="mx-auto w-20 h-20 mb-6 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <div id="results-empty" class="h-full flex flex-col items-center justify-center text-[#6B7280] text-center px-10">
+                    <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-200">
+                        <svg class="mx-auto w-20 h-20 mb-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         
-                        <p class="text-xl font-black text-slate-800 mb-3 uppercase tracking-wide">
+                        <p class="text-xl font-black text-[#111827] mb-3 uppercase tracking-wide">
                             Готовность к интеллектуальному анализу
                         </p>
                         
-                        <p class="text-sm text-slate-500 max-w-md leading-relaxed mx-auto">
+                        <p class="text-sm text-[#6B7280] max-w-md leading-relaxed mx-auto">
                             На основе валидированных ML-моделей (RandomForest) система оценит индивидуальный профиль риска с учетом нелинейных взаимодействий и сформирует план ведения по актуальным Клиническим рекомендациям МЗ РФ.
                         </p>
                     </div>
@@ -151,17 +172,17 @@
 
                     <div id="recommendations-wrapper" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden fade-in"></div>
 
-                    <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-xl space-y-4 fade-in">
-                        <div class="flex items-center justify-between border-b border-indigo-700 pb-3">
+                    <div class="bg-[#DBEAFE] text-[#111827] p-6 rounded-2xl shadow-md border border-blue-200 space-y-4 fade-in">
+                        <div class="flex items-center justify-between border-b border-blue-300 pb-3">
                             <div class="flex items-center gap-2">
-                                <svg class="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <h4 class="font-bold text-sm uppercase tracking-wider">Протокол CDSS</h4>
+                                <svg class="w-6 h-6 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <h4 class="font-bold text-sm uppercase tracking-wider text-[#3B82F6]">Протокол CDSS</h4>
                             </div>
-                            <button onclick="openModal('modal-cdss-info')" class="text-[10px] text-indigo-300 hover:text-white underline underline-offset-4 font-black uppercase">Подробнее о системе CDSS →</button>
+                            <button onclick="openModal('modal-cdss-info')" class="text-[10px] text-[#3B82F6] hover:text-[#2563EB] underline underline-offset-4 font-black uppercase">Подробнее о системе CDSS →</button>
                         </div>
-                        <div id="cdss-generated-text" class="text-[12px] leading-relaxed opacity-95 whitespace-pre-wrap font-normal tracking-tight"></div>
+                        <div id="cdss-generated-text" class="text-[12px] leading-relaxed whitespace-pre-wrap font-medium tracking-tight text-[#111827]"></div>
                         <div class="pt-2">
-                            <button id="copy-to-comment" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black py-2 px-5 rounded-xl uppercase transition border border-indigo-500 flex items-center gap-2">
+                            <button id="copy-to-comment" class="bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-black py-2 px-5 rounded-xl uppercase transition border border-blue-600 flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 Принять экспертное мнение CDSS (копировать вниз)
                             </button>
@@ -170,15 +191,15 @@
 
                     <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-md space-y-5 fade-in">
                         <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Обоснование выбора и особые отметки:</label>
-                            <textarea id="doctor-comment" class="w-full text-sm border-gray-200 rounded-xl focus:ring-indigo-500 h-24" placeholder="Введите тактические указания..."></textarea>
+                            <label class="text-[10px] font-bold text-[#6B7280] uppercase">Обоснование выбора и особые отметки:</label>
+                            <textarea id="doctor-comment" class="w-full text-sm border-gray-200 rounded-xl focus:ring-blue-500 h-24 p-2" placeholder="Введите тактические указания..."></textarea>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-2 pt-2">
-                            <button id="btn-protocol" class="flex-1 bg-indigo-600 text-white font-black text-[11px] py-4 rounded-xl uppercase hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
+                            <button id="btn-protocol" class="flex-1 bg-[#3B82F6] text-white font-black text-[11px] py-4 rounded-xl uppercase hover:bg-[#2563EB] transition shadow-lg flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 Сформировать протокол CDSS
                             </button>
-                            <button id="btn-export" class="flex-1 bg-white border-2 border-indigo-600 text-indigo-600 font-black text-[11px] py-4 rounded-xl uppercase hover:bg-indigo-50 transition flex items-center justify-center gap-2">
+                            <button id="btn-export" class="flex-1 bg-white border-2 border-[#3B82F6] text-[#3B82F6] font-black text-[11px] py-4 rounded-xl uppercase hover:bg-blue-50 transition flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                                 Экспорт в ЭМК МИС
                             </button>
@@ -192,24 +213,65 @@
 
     <div id="modal-cdss-info" class="modal">
         <div class="modal-content">
-            <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Система поддержки принятия врачебных решений (CDSS)</h2>
-            <div class="space-y-4 text-sm leading-relaxed text-slate-700">
+            <h2 class="text-xl font-bold text-[#111827] mb-4 uppercase">Система поддержки принятия врачебных решений (CDSS)</h2>
+            <div class="space-y-4 text-sm leading-relaxed text-[#374151]">
                 <p><strong>Clinical Decision Support System (CDSS)</strong> — это цифровая платформа, интегрирующая медицинские знания с данными о пациенте для помощи врачу в принятии клинических решений.</p>
-                <p>Данная система использует ансамблевые ML-модели (RandomForest), обученные на когорте беременных высокого риска.</p>
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <p class="font-bold mb-2">Задачи системы:</p>
-                    <ul class="list-disc pl-5 space-y-1">
+                <p>Данная система использует ансамблевые ML-модели (RandomForest), обученные на когорте беременных высокого риска. В отличие от простых шкал, CDSS оценивает нелинейные взаимодействия факторов (например, сочетание возраста, курения и нутритивного дефицита).</p>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="font-bold mb-2 text-[#111827]">Задачи системы в практике акушера-гинеколога:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-[#4B5563]">
                         <li><strong>Объективизация:</strong> Количественная оценка вероятности ПЭ и ЗРП.</li>
                         <li><strong>Раннее выявление:</strong> Стратификация риска уже в I триместре.</li>
+                        <li><strong>Снижение нагрузки:</strong> Автоматический отбор пациентов, нуждающихся в экспертном УЗИ.</li>
                         <li><strong>Доказательность:</strong> Прямая интеграция тактики с Клиническими рекомендациями МЗ РФ.</li>
                     </ul>
                 </div>
+                <p class="italic text-xs text-gray-400 text-center">Разработано на базе ГКБ им. М.А. Тверье (2024-2025). Авторы: Завьялова Ю.А., Олина А.А. и соавт.</p>
             </div>
-            <button onclick="closeModal('modal-cdss-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Вернуться к калькулятору</button>
+            <button onclick="closeModal('modal-cdss-info')" class="mt-6 w-full py-3 bg-[#1F2937] text-white rounded-lg font-bold uppercase text-xs hover:bg-black transition">Вернуться к калькулятору</button>
         </div>
     </div>
-    <div id="modal-pe-info" class="modal"><div class="modal-content"><h2 class="text-xl font-bold text-indigo-800 mb-4">Информация о модели ПЭ</h2><p>RandomForestClassifier. ROC-AUC: 0.842.</p><button onclick="closeModal('modal-pe-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Закрыть</button></div></div>
-    <div id="modal-fgr-info" class="modal"><div class="modal-content"><h2 class="text-xl font-bold text-indigo-800 mb-4">Информация о модели ЗРП</h2><p>RandomForestClassifier. ROC-AUC: 0.884.</p><button onclick="closeModal('modal-fgr-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Закрыть</button></div></div>
+
+    <div id="modal-pe-info" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-[#111827] mb-4 uppercase">Научное описание модели прогнозирования ПЭ</h2>
+            <div class="space-y-4 text-sm leading-relaxed text-[#374151]">
+                <p><strong>Разработчики:</strong> Завьялова Ю.А., Олина А.А. и соавторы.</p>
+                <p><strong>Алгоритм:</strong> Ансамблевая модель «Случайный лес» (RandomForestClassifier). Для обеспечения точности вероятностных предсказаний применена <strong>калибровка вероятностей методом Платта (Platt scaling)</strong> через CalibratedClassifierCV.</p>
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <p class="font-bold text-blue-900 mb-2 uppercase text-[10px]">Метрики качества (Bootstrap-валидация n=1000):</p>
+                    <ul class="list-disc pl-5 space-y-1 text-blue-800">
+                        <li><strong>ROC-AUC: 0.842</strong> ([0.797; 0.883]) - отличная дискриминирующая способность.</li>
+                        <li><strong>Чувствительность: 0.867</strong> (при скрининговом пороге 0.57) - минимизация ложноотрицательных результатов.</li>
+                        <li><strong>Специфичность: 0.550</strong></li>
+                        <li><strong>PR-AUC: 0.919</strong> - высокая точность для несбалансированных классов.</li>
+                    </ul>
+                </div>
+                <p><strong>Клиническая польза:</strong> Анализ кривых принятия решений (Decision Curve Analysis) подтверждает превосходство модели над стратегией «лечить всех» в диапазоне порогов риска 0,1–0,5. Модель учитывает сложные взаимодействия факторов: возраст, ИМТ, паритет и анамнез.</p>
+            </div>
+            <button onclick="closeModal('modal-pe-info')" class="mt-6 w-full py-3 bg-[#1F2937] text-white rounded-lg font-bold uppercase text-xs hover:bg-black transition">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="modal-fgr-info" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-[#111827] mb-4 uppercase">Научное описание модели прогнозирования ЗРП</h2>
+            <div class="space-y-4 text-sm leading-relaxed text-[#374151]">
+                <p><strong>Разработчики:</strong> Завьялова Ю.А., Олина А.А. и соавторы.</p>
+                <p><strong>Алгоритм:</strong> RandomForestClassifier с использованием сбалансированных весов классов (class_weight='balanced') для учета невысокой распространенности исхода (5-10% в популяции). Гиперпараметры оптимизированы через GridSearch.</p>
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <p class="font-bold text-blue-900 mb-2 uppercase text-[10px]">Метрики качества (Bootstrap-валидация n=1000):</p>
+                    <ul class="list-disc pl-5 space-y-1 text-blue-800">
+                        <li><strong>ROC-AUC: 0.884</strong> ([0.848; 0.918]) - высокая предсказательная способность.</li>
+                        <li><strong>Чувствительность: 0.851</strong> (скрининговый порог 0.39) - выявление 8.5 из 10 случаев ЗРП.</li>
+                        <li><strong>Специфичность: 0.738</strong></li>
+                    </ul>
+                </div>
+                <p><strong>Обоснование:</strong> Модель фокусируется на нелинейных взаимодействиях между курением, нутритивной прибавкой веса и интегральным риском I скрининга. Отдельно учитывается анамнез ЗРП, который повышает риск (OR 2.2).</p>
+            </div>
+            <button onclick="closeModal('modal-fgr-info')" class="mt-6 w-full py-3 bg-[#1F2937] text-white rounded-lg font-bold uppercase text-xs hover:bg-black transition">Закрыть</button>
+        </div>
+    </div>
 
    <script>
         // === КОНФИГУРАЦИЯ API И МОДЕЛЕЙ ===
@@ -224,7 +286,6 @@
                 thresholdSevere: 0.80,
                 baseRef: 'Раздел 5 «Профилактика», Раздел 3 «Диагностика».',
                 checkList: [
-                    // requiredLevel: 'high' (всегда при высоком риске), 'severe' (только при тяжелом)
                     {text: 'Назначить ацетилсалициловую кислоту 150 мг на ночь (до 36 нед.)', category: 'Медикаментозная профилактика', requiredLevel: 'high'},
                     {text: 'Препараты кальция 1г/сут (при низком потреблении)', category: 'Медикаментозная профилактика', requiredLevel: 'high'},
                     {text: 'Контроль АД (2 раза в день) + ведение дневника', category: 'Мониторинг', requiredLevel: 'high'},
@@ -275,22 +336,24 @@
                     <div class="space-y-1">
                         <div class="flex justify-between text-[11px] mb-1">
                             <span>${f.label}</span>
-                            <span class="text-rose-400 font-bold">OR: ${f.or}</span>
+                            <span class="text-white font-bold opacity-90">OR: ${f.or}</span>
                         </div>
-                        <div class="h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" style="width: ${width}%"></div>
+                        <div class="h-2.5 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-[#EF4444] border-r border-white/20" style="width: ${width}%"></div>
                         </div>
                     </div>
                 `;
             }).join('');
+            
+            // Фон: Темно-серый #1F2937, Текст: Белый
             return `
-                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-700 fade-in">
+                <div class="bg-[#1F2937] text-white p-6 rounded-2xl shadow-xl border border-gray-700 fade-in">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-base font-bold flex items-center uppercase tracking-tight text-indigo-400">
+                        <h3 class="text-base font-bold flex items-center uppercase tracking-tight text-white">
                             Ведущие факторы риска (Отношение шансов)
                         </h3>
                     </div>
-                    <div class="space-y-4">${barsHTML}</div>
+                    <div class="space-y-4 text-white">${barsHTML}</div>
                 </div>
             `;
         }
@@ -314,28 +377,32 @@
                 const isSevere = prob >= model.thresholdSevere;
                 const severityLabel = model.id === 'pe' ? 'ПЭ' : 'ЗРП';
 
-                const borderClass = isHigh ? 'border-rose-600' : 'border-emerald-500';
-                const badgeColor = isHigh ? 'rose' : 'emerald';
-                const badgeText = isHigh ? 'Высокий риск' : 'Низкий риск';
-                const textColor = isHigh ? 'rose' : 'emerald';
+                // Цвета и стили согласно Варианту A
+                // Низкий риск: Фон #ECFDF5, Рамка #10B981, Текст #10B981
+                // Высокий риск: Фон #FEF2F2, Рамка #EF4444, Текст #EF4444
+                const bgColor = isHigh ? 'bg-[#FEF2F2]' : 'bg-[#ECFDF5]';
+                const borderColor = isHigh ? 'border-[#EF4444]' : 'border-[#10B981]';
+                const textColor = isHigh ? 'text-[#EF4444]' : 'text-[#10B981]';
+                const badgeText = isHigh ? 'ВЫСОКИЙ РИСК' : 'НИЗКИЙ РИСК';
+                const icon = isHigh ? '⚠️' : '🛡️';
 
                 // Карточка
                 const cardHtml = `
-                    <div class="bg-white border-l-8 ${borderClass} p-5 rounded-xl shadow-sm hover:shadow-md transition flex flex-col fade-in">
+                    <div class="${bgColor} border-2 ${borderColor} p-6 rounded-xl shadow-sm hover:shadow-md transition flex flex-col fade-in">
                         <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-black text-slate-800 uppercase text-xs">${model.title}</h4>
+                            <h4 class="font-bold text-[#111827] uppercase text-xs tracking-wider">${model.title}</h4>
                             <div class="flex flex-col items-end gap-1 text-right">
-                                <span class="bg-${badgeColor}-100 text-${badgeColor}-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                                    ${badgeText}
+                                <span class="font-bold text-[10px] uppercase flex items-center gap-1 ${textColor}">
+                                    ${icon} ${badgeText}
                                 </span>
-                                ${isSevere ? `<span class="bg-red-800 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase animate-pulse">Риск тяжелой ${severityLabel}</span>` : ''}
+                                ${isSevere ? `<span class="bg-[#EF4444] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase animate-pulse">Риск тяжелой ${severityLabel}</span>` : ''}
                             </div>
                         </div>
-                        <div class="text-3xl font-black text-${textColor}-600 mb-2">${percent}</div>
-                        <div class="p-3 bg-${badgeColor}-50 border border-${badgeColor}-100 rounded-lg text-[10px] text-slate-700 mb-3 leading-tight flex-1">
+                        <div class="text-[36px] font-bold ${textColor} mb-2 leading-none">${percent}</div>
+                        <div class="p-3 bg-white/60 border border-gray-200/50 rounded-lg text-[10px] text-[#4B5563] mb-4 leading-tight flex-1">
                             <strong>Обоснование:</strong> ${model.baseRef}
                         </div>
-                        <button onclick="openModal('modal-${model.id}-info')" class="text-[9px] font-black text-indigo-600 uppercase hover:underline text-left">Подробнее о модели ${model.id === 'pe' ? 'ПЭ' : 'ЗРП'} →</button>
+                        <button onclick="openModal('modal-${model.id}-info')" class="text-[10px] font-bold text-[#3B82F6] uppercase hover:underline text-left">Подробнее о модели ${model.id === 'pe' ? 'ПЭ' : 'ЗРП'} →</button>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
@@ -344,7 +411,6 @@
                 if (isHigh) {
                     hasAnyHighRisk = true;
                     
-                    // Группировка по категориям
                     const grouped = {};
                     model.checkList.forEach(item => {
                         if (!grouped[item.category]) grouped[item.category] = [];
@@ -354,25 +420,21 @@
                     let groupHTML = '';
                     for (const [category, items] of Object.entries(grouped)) {
                         const itemsHTML = items.map(item => {
-                            // Логика "Умной галочки":
-                            // Галочка ставится если:
-                            // 1. Уровень требования 'high' И есть высокий риск (а он есть, раз мы в if(isHigh))
-                            // 2. Уровень требования 'severe' И риск тяжелый (isSevere)
                             const isChecked = (item.requiredLevel === 'high') || (item.requiredLevel === 'severe' && isSevere);
-                            const opacityClass = isChecked ? '' : 'opacity-60 grayscale'; // Визуально гасим неактивные
+                            const opacityClass = isChecked ? '' : 'opacity-50 grayscale';
 
                             return `
                                 <label class="flex items-start p-2 hover:bg-gray-50 rounded cursor-pointer transition ${opacityClass}">
-                                    <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 w-4 h-4 text-indigo-600 rounded mr-3">
-                                    <span class="text-[11px] leading-tight text-slate-700">${item.text}</span>
+                                    <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 w-4 h-4 text-[#3B82F6] rounded mr-3 border-gray-300 focus:ring-blue-500">
+                                    <span class="text-[11px] leading-tight text-[#374151] font-medium">${item.text}</span>
                                 </label>
                             `;
                         }).join('');
 
                         groupHTML += `
-                            <div class="mb-3 last:mb-0">
-                                <h6 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 pl-2 border-l-2 border-indigo-200">${category}</h6>
-                                <div class="space-y-0.5">
+                            <div class="mb-4 last:mb-0">
+                                <h6 class="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider mb-2 pl-2 border-l-2 border-gray-200">${category}</h6>
+                                <div class="space-y-1">
                                     ${itemsHTML}
                                 </div>
                             </div>
@@ -380,10 +442,10 @@
                     }
 
                     combinedRecsHTML += `
-                        <div class="bg-slate-50 p-4 border-b last:border-b-0 border-gray-100">
-                             <div class="flex items-center gap-2 mb-3">
-                                <span class="bg-indigo-100 text-indigo-700 text-[9px] font-black px-1.5 py-0.5 rounded">КР МЗ РФ</span>
-                                <h5 class="text-xs font-bold text-indigo-900 leading-tight hover:underline cursor-pointer" title="Нажмите, чтобы открыть текст КР">${model.crRef}</h5>
+                        <div class="bg-white p-5 border-b last:border-b-0 border-gray-100">
+                             <div class="flex items-center gap-2 mb-4">
+                                <span class="bg-blue-50 text-[#3B82F6] text-[9px] font-black px-2 py-0.5 rounded">КР МЗ РФ</span>
+                                <h5 class="text-xs font-bold text-[#1F2937] leading-tight hover:text-[#3B82F6] cursor-pointer transition" title="Нажмите, чтобы открыть текст КР">${model.crRef}</h5>
                              </div>
                              ${groupHTML}
                         </div>
@@ -394,9 +456,9 @@
             // 3. Рисуем общий блок тактики
             if (hasAnyHighRisk && combinedRecsHTML) {
                 recWrapper.innerHTML = `
-                    <div class="p-4 bg-white border-b border-gray-100 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                        <h4 class="font-black text-sm uppercase text-slate-800 tracking-tight">Заключительное медицинское решение и тактика</h4>
+                    <div class="p-5 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        <h4 class="font-black text-sm uppercase text-[#1F2937] tracking-tight">Заключительное медицинское решение и тактика</h4>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                         ${combinedRecsHTML}
