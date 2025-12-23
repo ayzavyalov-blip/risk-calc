@@ -246,7 +246,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         // === КОНФИГУРАЦИЯ API И МОДЕЛЕЙ ===
         const API_URL = "https://bbao7sb3qb98qg2cso0r.containers.yandexcloud.net/predict";
 
@@ -295,7 +295,7 @@
         function renderRiskFactorsBlock(inputs) {
             const activeFactors = RISK_FACTORS_RULES.filter(rule => rule.check(inputs));
             
-            if (activeFactors.length === 0) return ''; // Скрываем блок, если нет факторов
+            if (activeFactors.length === 0) return ''; 
 
             activeFactors.sort((a, b) => b.or - a.or);
 
@@ -406,7 +406,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const trigger = document.getElementById('calc-trigger');
-            const resultsContent = document.getElementById('results-content');
+            
+            // --- ИСПРАВЛЕНИЕ: Используем правильный ID (results-container) ---
+            const resultsContent = document.getElementById('results-container'); 
             const emptyState = document.getElementById('results-empty');
             const cdssOutput = document.getElementById('cdss-generated-text');
             const doctorComment = document.getElementById('doctor-comment');
@@ -442,10 +444,10 @@
                     const data = await response.json();
 
                     emptyState.classList.add('hidden');
-                    resultsContent.classList.remove('hidden');
+                    resultsContent.classList.remove('hidden'); // Теперь эта строка сработает!
                     renderResults(data, inputs);
 
-                    // Генерация протокола (Точно как в оригинале)
+                    // Генерация протокола
                     const pName = document.getElementById('header-name').value;
                     const pWeeks = document.getElementById('header-weeks').value;
                     const pDoctor = document.getElementById('header-doctor').value;
@@ -504,3 +506,4 @@
     </script>
 </body>
 </html>
+
