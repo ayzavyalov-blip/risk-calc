@@ -511,33 +511,92 @@
                     document.getElementById('results-container').classList.remove('hidden');
                     renderResults(data, inputs);
 
-                    // Генерация протокола
+                    // === ГЕНЕРАЦИЯ ПОДРОБНОГО МЕДИЦИНСКОГО ПРОТОКОЛА ===
+                    
                     const pName = document.getElementById('header-name').value;
                     const pWeeks = document.getElementById('header-weeks').value;
                     const pDoctor = document.getElementById('header-doctor').value;
                     const pId = document.getElementById('header-id').value;
+                    const currentDate = new Date().toLocaleDateString('ru-RU');
                     
                     const probPE = data.pe_risk;
                     const probFGR = data.fgr_risk;
+                    const pePercent = (probPE * 100).toFixed(1);
+                    const fgrPercent = (probFGR * 100).toFixed(1);
 
-                    const expertText = `ЗАКЛЮЧЕНИЕ CDSS (Clinical Decision Support System):
+                    // 1. Формирование диагноза и сопутствующих заболеваний (МКБ-10)
+                    let diagnosisText = `Беременность ${pWeeks}.`;
+                    let comorbidities = [];
+                    
+                    if (inputs.hag === 'Да') comorbidities.push("Хроническая артериальная гипертензия (O10.0)");
+                    if (inputs.kidney === 'Да') comorbidities.push("Болезни почек (O10.2 / N00-N29)");
+                    if (parseFloat(inputs.bmi) >= 30) comorbidities.push(`Ожирение (ИМТ ${inputs.bmi}) (E66.0)`);
+                    if (inputs.pe_hist === 'Да') comorbidities.push("Отягощенный акушерский анамнез: ПЭ в прошлом (O09.2)");
+                    if (inputs.fgr_hist === 'Да') comorbidities.push("Отягощенный акушерский анамнез: ЗРП в прошлом (O09.5)");
+                    if (inputs.smoking === 'Курит') comorbidities.push("Табакокурение (F17.2)");
 
-1. ПАСПОРТНАЯ ЧАСТЬ И АНАМНЕЗ:
-Пациентка: ${pName} (ID: ${pId})
-Срок: ${pWeeks}. Возраст: ${inputs.age}. ИМТ: ${inputs.bmi}.
-Факторы риска: ПЭ в анамнезе (${inputs.pe_hist}), ХАГ (${inputs.hag}), Патология почек (${inputs.kidney}).
+                    const comorbText = comorbidities.length > 0 ? `\nСопутствующие: ${comorbidities.join(', ')}.` : "";
 
-2. РЕЗУЛЬТАТ АНАЛИЗА ML-МОДЕЛИ:
-${probPE > 0.57 || probFGR > 0.39 ? '⚠️ ВЫСОКИЙ РИСК ОСЛОЖНЕНИЙ' : '✅ НИЗКИЙ РИСК'}
-- ПЭ: ${(probPE*100).toFixed(1)}% (Порог 57%)
-- ЗРП: ${(probFGR*100).toFixed(1)}% (Порог 39%)
+                    // 2. Оценка риска и драйверы
+                    const isHighRiskPE = probPE > 0.57;
+                    const isHighRiskFGR = probFGR > 0.39;
+                    
+                    let riskConclusion = "";
+                    if (isHighRiskPE && isHighRiskFGR) riskConclusion = "ВЫСОКИЙ РИСК ПРЕЭКЛАМПСИИ И ЗАДЕРЖКИ РОСТА ПЛОДА.";
+                    else if (isHighRiskPE) riskConclusion = "ВЫСОКИЙ РИСК ПРЕЭКЛАМПСИИ.";
+                    else if (isHighRiskFGR) riskConclusion = "ВЫСОКИЙ РИСК ЗАДЕРЖКИ РОСТА ПЛОДА.";
+                    else riskConclusion = "Низкий риск больших акушерских синдромов.";
 
-3. РЕКОМЕНДАЦИИ (КР МЗ РФ):
-${probPE > 0.57 ? '- Назначить АСК 150 мг/сут.\n- Контроль АД и протеинурии.' : '- Специфическая профилактика ПЭ не показана.'}
-${probFGR > 0.39 ? '- УЗ-допплерометрия и фетометрия (14-21 дн).' : '- Рутинный мониторинг.'}
+                    // 3. План ведения (Сборка на основе КР)
+                    let plan = [];
+                    
+                    // Общее
+                    plan.push(`1. Диспансерное наблюдение: ${isHighRiskPE || isHighRiskFGR ? 'Индивидуальный график (явка каждые 2 недели)' : 'Согласно приказу 1130н'}.`);
+                    
+                    // ПЭ ветка
+                    if (isHighRiskPE) {
+                        plan.push(`2. ПРОФИЛАКТИКА ПЭ (КР 2021):`);
+                        plan.push(`   - Ацетилсалициловая кислота 150 мг на ночь (до 36 нед).`);
+                        plan.push(`   - Контроль АД 2 раза/сут + ведение дневника.`);
+                        plan.push(`   - ОАК, биохимия, коагулограмма - контроль при появлении симптомов.`);
+                        plan.push(`   - Тест на протеинурию при каждой явке.`);
+                    } else {
+                         plan.push(`2. Профилактика ПЭ: Специфическая медикаментозная терапия не показана.`);
+                    }
 
-Врач: ${pDoctor}`;
+                    // ЗРП ветка
+                    if (isHighRiskFGR) {
+                        plan.push(`3. МОНИТОРИНГ ЗРП (КР 2022):`);
+                        plan.push(`   - УЗ-фетометрия в динамике (интервал 14-21 день).`);
+                        plan.push(`   - Допплерометрия маточно-плацентарного кровотока.`);
+                        plan.push(`   - Контроль ВДМ и окружности живота при каждой явке.`);
+                    } else {
+                        plan.push(`3. Мониторинг плода: Плановые скрининговые УЗИ.`);
+                    }
 
+                    // Формирование итогового текста
+                    const expertText = `ПРОТОКОЛ ОЦЕНКИ ИНДИВИДУАЛЬНОГО РИСКА (CDSS)
+Дата расчета: ${currentDate}
+ФИО: ${pName} (ID: ${pId})
+Возраст: ${inputs.age} лет.
+
+I. КЛИНИЧЕСКИЙ ДИАГНОЗ (ПРЕДВАРИТЕЛЬНЫЙ):
+${diagnosisText}${comorbText}
+
+II. ПРОГНОЗ РАЗВИТИЯ ОСЛОЖНЕНИЙ (AI-АНАЛИЗ):
+Заключение: ${riskConclusion}
+Детализация расчета:
+- Вероятность ПЭ: ${pePercent}% (Порог отсечки высокого риска: 57%).
+- Вероятность ЗРП: ${fgrPercent}% (Порог отсечки высокого риска: 39%).
+Данные I скрининга: риск ПЭ ${inputs.scr_pe}, риск ЗРП ${inputs.scr_fgr}.
+
+III. РЕКОМЕНДОВАННЫЙ ПЛАН ВЕДЕНИЯ (Согласно КР МЗ РФ):
+${plan.join('\n')}
+
+Врач: ${pDoctor}
+_______________________ (Подпись)`;
+                    
+                    // Вывод
                     cdssOutput.innerText = expertText;
                     document.getElementById('input-column').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -573,3 +632,4 @@ ${probFGR > 0.39 ? '- УЗ-допплерометрия и фетометрия 
     </script>
 </body>
 </html>
+
