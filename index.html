@@ -234,62 +234,64 @@
     </div>
 
     <div id="modal-cdss-info" class="modal text-balance">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Научное обоснование системы (CDSS)</h2>
-            <div class="space-y-4 text-sm leading-relaxed text-slate-700">
-                <p><strong>Clinical Decision Support System (CDSS)</strong> — это цифровая платформа экспертного уровня, разработанная для объективизации акушерских рисков на основе анализа данных и ансамблевых моделей машинного обучения.</p>
-                <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-100 space-y-4">
-                    <p class="font-bold mb-1 uppercase text-xs text-indigo-900 tracking-widest">Методология:</p>
-                    <ul class="list-disc pl-5 space-y-2 text-[12px]">
-                        <li><strong>Выборка:</strong> Верифицированная когорта (n=306) высокого риска (ГКБ им. М.А. Тверье, 2020–2024).</li>
-                        <li><strong>Алгоритм:</strong> Ансамблевая модель RandomForest (500 деревьев) с балансировкой классов.</li>
-                        <li><strong>Калибровка:</strong> Isotonic Regression для точной оценки вероятностей.</li>
-                        <li><strong>Валидация:</strong> Bootstrap (1000 репликаций) с расчетом 95% доверительных интервалов.</li>
-                    </ul>
-                </div>
-                <p class="italic text-xs text-slate-500 text-center border-t pt-4">Авторы: Завьялова Ю.А., Олина А.А. и соавт.</p>
+    <div class="modal-content">
+        <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Научное обоснование системы (CDSS)</h2>
+        <div class="space-y-4 text-sm leading-relaxed text-slate-700">
+            <p><strong>Clinical Decision Support System (CDSS)</strong> — это цифровая платформа экспертного уровня, разработанная для объективизации акушерских рисков на основе анализа данных и ансамблевых моделей машинного обучения[cite: 15, 221]. Система интегрирует клинико-анамнестические, антропометрические и скрининговые предикторы для персонализированного прогнозирования осложнений[cite: 59, 224].</p>
+            <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-100 space-y-4">
+                <p class="font-bold mb-1 uppercase text-xs text-indigo-900 tracking-widest">Методология:</p>
+                <ul class="list-disc pl-5 space-y-2 text-[12px]">
+                    <li><strong>Выборка:</strong> Ретроспективная одноцентровая когорта (n=306) пациенток, родоразрешённых в ГКБ им. М.А. Тверье в 2024 г.[cite: 4, 32].</li>
+                    <li><strong>Алгоритм:</strong> Ансамблевая модель RandomForestClassifier (500 деревьев) с применением техники балансировки весов классов для коррекции дисбаланса исходов[cite: 106, 107].</li>
+                    <li><strong>Калибровка:</strong> Использование изотонической регрессии (Isotonic Regression) для преобразования сырых оценок классификатора в математически точные вероятности наступления события.</li>
+                    <li><strong>Валидация:</strong> Устойчивость модели подтверждена методом Bootstrap (1000 репликаций) с расчетом 95% доверительных интервалов для всех ключевых метрик[cite: 13, 138].</li>
+                </ul>
             </div>
-            <button onclick="closeModal('modal-cdss-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs tracking-widest hover:bg-slate-700">Вернуться к калькулятору</button>
+            <p class="italic text-xs text-slate-500 text-center border-t pt-4">Авторы: Завьялова Ю.А., Олина А.А. и соавт. [cite: 252]</p>
         </div>
+        <button onclick="closeModal('modal-cdss-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs tracking-widest hover:bg-slate-700">Вернуться к калькулятору</button>
     </div>
+</div>
 
-    <div id="modal-pe-info" class="modal text-balance">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Модель прогнозирования ПЭ</h2>
-            <div class="space-y-4 text-[13px] leading-relaxed text-slate-700">
-                <p><strong>Цель:</strong> Прогноз ПЭ любой степени тяжести с акцентом на тяжелые формы.</p>
-                <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
-                    <p class="font-bold text-indigo-900 mb-2 uppercase text-[10px] tracking-widest">Метрики качества (Bootstrap 1000):</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>ROC-AUC: 0.842</strong> ([0.797; 0.883])</li>
-                        <li><strong>Чувствительность: 0.867</strong> (порог 0.57)</li>
-                        <li><strong>PR-AUC: 0.919</strong></li>
-                    </ul>
-                </div>
-                <p>Результаты DCA подтверждают преимущество модели перед стратегией тотальной профилактики.</p>
+<div id="modal-pe-info" class="modal text-balance">
+    <div class="modal-content">
+        <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Модель прогнозирования ПЭ</h2>
+        <div class="space-y-4 text-[13px] leading-relaxed text-slate-700">
+            <p><strong>Цель:</strong> Прогнозирование преэклампсии любой степени тяжести (умеренной или тяжёлой) в соответствии с критериями клинических рекомендаций Минздрава России[cite: 3, 37].</p>
+            <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
+                <p class="font-bold text-indigo-900 mb-2 uppercase text-[10px] tracking-widest">Метрики качества (Bootstrap 1000):</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>ROC-AUC: 0.842</strong> (95% ДИ: [0.797; 0.883]) [cite: 144, 174]</li>
+                    <li><strong>Чувствительность: 0.867</strong> (при скрининговом пороге 0.57) [cite: 175]</li>
+                    <li><strong>Специфичность: 0.550</strong> [cite: 176]</li>
+                    <li><strong>PR-AUC: 0.919</strong> [cite: 144]</li>
+                </ul>
             </div>
-            <button onclick="closeModal('modal-pe-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs tracking-widest hover:bg-slate-700">Закрыть описание</button>
+            <p><strong>Ключевые факторы:</strong> Гестационная и хроническая АГ, ИМТ, интергравидарный интервал и наличие заболеваний почек[cite: 209]. Результаты анализа клинической пользы (DCA) подтверждают преимущество модели перед стратегией тотальной профилактики («лечить всех») в диапазоне порогов риска 0.1–0.5[cite: 14, 194].</p>
         </div>
+        <button onclick="closeModal('modal-pe-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs tracking-widest hover:bg-slate-700">Закрыть описание</button>
     </div>
+</div>
 
-    <div id="modal-fgr-info" class="modal text-balance">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Модель прогнозирования ЗРП</h2>
-            <div class="space-y-4 text-[13px] leading-relaxed text-slate-700">
-                <p><strong>Цель:</strong> Выявление риска рождения плода с массой ниже 10-го перцентиля.</p>
-                <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
-                    <p class="font-bold text-indigo-900 mb-2 uppercase text-[10px] tracking-widest">Метрики качества (Bootstrap 1000):</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>ROC-AUC: 0.884</strong> ([0.848; 0.918])</li>
-                        <li><strong>Чувствительность: 0.851</strong> (порог 0.39)</li>
-                        <li><strong>PR-AUC: 0.810</strong></li>
-                    </ul>
-                </div>
-                <p>Модель выявляет специфический нутритивно-метаболический фенотип (ЗРП-НМП).</p>
+<div id="modal-fgr-info" class="modal text-balance">
+    <div class="modal-content">
+        <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Модель прогнозирования ЗРП</h2>
+        <div class="space-y-4 text-[13px] leading-relaxed text-slate-700">
+            <p><strong>Цель:</strong> Выявление риска задержки роста плода (диагностированной по перцентильным кривым и допплерометрическим признакам)[cite: 38].</p>
+            <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
+                <p class="font-bold text-indigo-900 mb-2 uppercase text-[10px] tracking-widest">Метрики качества (Bootstrap 1000):</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>ROC-AUC: 0.884</strong> (95% ДИ: [0.848; 0.918]) [cite: 144, 178]</li>
+                    <li><strong>Чувствительность: 0.851</strong> (при скрининговом пороге 0.39) [cite: 179]</li>
+                    <li><strong>Специфичность: 0.738</strong> [cite: 180]</li>
+                    <li><strong>PR-AUC: 0.810</strong> [cite: 144]</li>
+                </ul>
             </div>
-            <button onclick="closeModal('modal-fgr-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs tracking-widest hover:bg-slate-700">Закрыть описание</button>
+            <p><strong>Особенности:</strong> Модель высокоэффективна в выявлении специфического <strong>нутритивно-метаболического фенотипа (ЗРП-НМП)</strong>, характеризующегося сочетанием ЗРП с дефицитом массы тела матери, недостаточной прибавкой веса и маркерами плацентарной дисфункции[cite: 6, 40]. Основными предикторами выступают характер гестационной прибавки массы, курение и данные первого скрининга[cite: 213].</p>
         </div>
+        <button onclick="closeModal('modal-fgr-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs tracking-widest hover:bg-slate-700">Закрыть описание</button>
     </div>
+</div>
     <script>
         // === ВАЖНО: Вставьте сюда ссылку из Colab (например, https://xxxx.ngrok-free.app) ===
         const API_URL = "https://bbao7sb3qb98qg2cso0r.containers.yandexcloud.net/predict"; 
@@ -433,3 +435,4 @@ ${probPE >= THRESHOLDS.PE[mode] ? '1. Профилактика ПЭ (Разд. 5
 </body>
 
 </html>
+
