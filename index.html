@@ -131,8 +131,14 @@
                 <div id="results-empty" class="h-full flex flex-col items-center justify-center text-slate-400 text-center px-10">
                     <div class="bg-white p-10 rounded-3xl shadow-sm border border-slate-100">
                         <svg class="mx-auto w-20 h-20 mb-6 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        <p class="text-xl font-black text-slate-800 mb-2 uppercase tracking-wide">На основе валидированных ML-моделей (RandomForest)</p>
-                        <p class="text-sm text-slate-400 max-w-sm leading-relaxed">Система оценит индивидуальный профиль риска с учетом нелинейных взаимодействий и сформирует план ведения по актуальным Клиническим рекомендациям.</p>
+                        
+                        <p class="text-xl font-black text-slate-800 mb-3 uppercase tracking-wide">
+                            Готовность к интеллектуальному анализу
+                        </p>
+                        
+                        <p class="text-sm text-slate-500 max-w-md leading-relaxed mx-auto">
+                            На основе валидированных ML-моделей (RandomForest) система оценит индивидуальный профиль риска с учетом нелинейных взаимодействий и сформирует план ведения по актуальным Клиническим рекомендациям МЗ РФ.
+                        </p>
                     </div>
                 </div>
 
@@ -143,7 +149,7 @@
 
                     <div id="cards-wrapper" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
 
-                    <div id="recommendations-wrapper" class="bg-white p-6 rounded-2xl border-2 border-indigo-100 shadow-lg space-y-5 fade-in hidden"></div>
+                    <div id="recommendations-wrapper" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden fade-in"></div>
 
                     <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-xl space-y-4 fade-in">
                         <div class="flex items-center justify-between border-b border-indigo-700 pb-3">
@@ -189,62 +195,21 @@
             <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Система поддержки принятия врачебных решений (CDSS)</h2>
             <div class="space-y-4 text-sm leading-relaxed text-slate-700">
                 <p><strong>Clinical Decision Support System (CDSS)</strong> — это цифровая платформа, интегрирующая медицинские знания с данными о пациенте для помощи врачу в принятии клинических решений.</p>
-                <p>Данная система использует ансамблевые ML-модели (RandomForest), обученные на когорте беременных высокого риска. В отличие от простых шкал, CDSS оценивает нелинейные взаимодействия факторов (например, сочетание возраста, курения и нутритивного дефицита).</p>
+                <p>Данная система использует ансамблевые ML-модели (RandomForest), обученные на когорте беременных высокого риска.</p>
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <p class="font-bold mb-2">Задачи системы в практике акушера-гинеколога:</p>
+                    <p class="font-bold mb-2">Задачи системы:</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Объективизация:</strong> Количественная оценка вероятности ПЭ и ЗРП.</li>
                         <li><strong>Раннее выявление:</strong> Стратификация риска уже в I триместре.</li>
-                        <li><strong>Снижение нагрузки:</strong> Автоматический отбор пациентов, нуждающихся в экспертном УЗИ.</li>
                         <li><strong>Доказательность:</strong> Прямая интеграция тактики с Клиническими рекомендациями МЗ РФ.</li>
                     </ul>
                 </div>
-                <p class="italic text-xs text-slate-500 text-center">Разработано на базе ГКБ им. М.А. Тверье (2024-2025). Авторы: Завьялова Ю.А., Олина А.А. и соавт.</p>
             </div>
             <button onclick="closeModal('modal-cdss-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Вернуться к калькулятору</button>
         </div>
     </div>
-
-    <div id="modal-pe-info" class="modal">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Научное описание модели прогнозирования ПЭ</h2>
-            <div class="space-y-4 text-sm leading-relaxed text-slate-700">
-                <p><strong>Разработчики:</strong> Завьялова Ю.А., Олина А.А. и соавторы.</p>
-                <p><strong>Алгоритм:</strong> Ансамблевая модель «Случайный лес» (RandomForestClassifier). Для обеспечения точности вероятностных предсказаний применена <strong>калибровка вероятностей методом Платта (Platt scaling)</strong> через CalibratedClassifierCV.</p>
-                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-                    <p class="font-bold text-indigo-900 mb-2 uppercase text-[10px]">Метрики качества (Bootstrap-валидация n=1000):</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>ROC-AUC: 0.842</strong> ([0.797; 0.883]) - отличная дискриминирующая способность.</li>
-                        <li><strong>Чувствительность: 0.867</strong> (при скрининговом пороге 0.57) - минимизация ложноотрицательных результатов.</li>
-                        <li><strong>Специфичность: 0.550</strong></li>
-                        <li><strong>PR-AUC: 0.919</strong> - высокая точность для несбалансированных классов.</li>
-                    </ul>
-                </div>
-                <p><strong>Клиническая польза:</strong> Анализ кривых принятия решений (Decision Curve Analysis) подтверждает превосходство модели над стратегией «лечить всех» в диапазоне порогов риска 0,1–0,5. Модель учитывает сложные взаимодействия факторов: возраст, ИМТ, паритет и анамнез.</p>
-            </div>
-            <button onclick="closeModal('modal-pe-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Закрыть</button>
-        </div>
-    </div>
-
-    <div id="modal-fgr-info" class="modal">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold text-indigo-800 mb-4 uppercase">Научное описание модели прогнозирования ЗРП</h2>
-            <div class="space-y-4 text-sm leading-relaxed text-slate-700">
-                <p><strong>Разработчики:</strong> Завьялова Ю.А., Олина А.А. и соавторы.</p>
-                <p><strong>Алгоритм:</strong> RandomForestClassifier с использованием сбалансированных весов классов (class_weight='balanced') для учета невысокой распространенности исхода (5-10% в популяции). Гиперпараметры оптимизированы через GridSearch.</p>
-                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-                    <p class="font-bold text-indigo-900 mb-2 uppercase text-[10px]">Метрики качества (Bootstrap-валидация n=1000):</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>ROC-AUC: 0.884</strong> ([0.848; 0.918]) - высокая предсказательная способность.</li>
-                        <li><strong>Чувствительность: 0.851</strong> (скрининговый порог 0.39) - выявление 8.5 из 10 случаев ЗРП.</li>
-                        <li><strong>Специфичность: 0.738</strong></li>
-                    </ul>
-                </div>
-                <p><strong>Обоснование:</strong> Модель фокусируется на нелинейных взаимодействиях между курением, нутритивной прибавкой веса и интегральным риском I скрининга. Отдельно учитывается анамнез ЗРП, который повышает риск (OR 2.2).</p>
-            </div>
-            <button onclick="closeModal('modal-fgr-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Закрыть</button>
-        </div>
-    </div>
+    <div id="modal-pe-info" class="modal"><div class="modal-content"><h2 class="text-xl font-bold text-indigo-800 mb-4">Информация о модели ПЭ</h2><p>RandomForestClassifier. ROC-AUC: 0.842.</p><button onclick="closeModal('modal-pe-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Закрыть</button></div></div>
+    <div id="modal-fgr-info" class="modal"><div class="modal-content"><h2 class="text-xl font-bold text-indigo-800 mb-4">Информация о модели ЗРП</h2><p>RandomForestClassifier. ROC-AUC: 0.884.</p><button onclick="closeModal('modal-fgr-info')" class="mt-6 w-full py-3 bg-slate-800 text-white rounded-lg font-bold uppercase text-xs">Закрыть</button></div></div>
 
    <script>
         // === КОНФИГУРАЦИЯ API И МОДЕЛЕЙ ===
@@ -254,31 +219,33 @@
             {
                 id: 'pe',
                 title: 'Преэклампсия (ПЭ)',
+                crRef: 'КР МЗ РФ «Преэклампсия. Эклампсия. Отеки...» (2021)',
                 threshold: 0.57, 
                 thresholdSevere: 0.80,
-                baseRef: 'КР МЗ РФ «Преэклампсия. Эклампсия. Отеки, протеинурия и гипертензивные расстройства во время беременности, в родах и послеродовом периоде» (2021).',
+                baseRef: 'Раздел 5 «Профилактика», Раздел 3 «Диагностика».',
                 checkList: [
-                    {text: 'Назначить ацетилсалициловую кислоту 150 мг на ночь (до 36 нед.)', title: 'Медикаментозная профилактика', color: 'text-rose-600', checked: true},
-                    {text: 'Контроль АД (утром и вечером) + дневник АД', title: 'Самоконтроль', color: 'text-blue-600', checked: true},
-                    {text: 'Определение белка в моче (тест-полоски) при каждой явке', title: 'Лабораторный контроль', color: 'text-indigo-600', checked: true},
-                    {text: 'Контроль веса (на предмет патологической прибавки)', title: 'Антропометрия', color: 'text-slate-600', checked: true},
-                    {text: 'Биохимический анализ крови, коагулограмма (при появлении симптомов)', title: 'Дообследование', color: 'text-gray-500', checked: true},
-                    {text: 'Допплерометрия маточных артерий во II триместре', title: 'УЗИ-мониторинг', color: 'text-purple-600', checked: true}
+                    // requiredLevel: 'high' (всегда при высоком риске), 'severe' (только при тяжелом)
+                    {text: 'Назначить ацетилсалициловую кислоту 150 мг на ночь (до 36 нед.)', category: 'Медикаментозная профилактика', requiredLevel: 'high'},
+                    {text: 'Препараты кальция 1г/сут (при низком потреблении)', category: 'Медикаментозная профилактика', requiredLevel: 'high'},
+                    {text: 'Контроль АД (2 раза в день) + ведение дневника', category: 'Мониторинг', requiredLevel: 'high'},
+                    {text: 'Определение белка в моче (тест-полоски) при каждой явке', category: 'Мониторинг', requiredLevel: 'high'},
+                    {text: 'Госпитализация в стационар III уровня', category: 'Тактика при тяжелых осложнениях', requiredLevel: 'severe'},
+                    {text: 'Досрочное родоразрешение (по показаниям)', category: 'Тактика при тяжелых осложнениях', requiredLevel: 'severe'}
                 ]
             },
             {
                 id: 'fgr',
-                title: 'Задержка роста плода',
+                title: 'Задержка роста плода (ЗРП)',
+                crRef: 'КР МЗ РФ «Недостаточный рост плода...» (2022)',
                 threshold: 0.39,
                 thresholdSevere: 0.70,
-                baseRef: 'КР МЗ РФ «Недостаточный рост плода, требующий предоставления медицинской помощи матери (задержка роста плода)» (2022).',
+                baseRef: 'Раздел 2.4 «Инструментальные диагностические исследования».',
                 checkList: [
-                    {text: 'Экспертная УЗ-допплерометрия (МА, АП) - контроль гемодинамики', title: 'Инструментальная диагностика', color: 'text-rose-600', checked: true},
-                    {text: 'Динамическая УЗ-фетометрия (интервал 14-21 день)', title: 'Контроль роста', color: 'text-blue-600', checked: true},
-                    {text: 'КТГ плода (с 26 недель при рисках, с 32 недель рутинно)', title: 'Оценка состояния', color: 'text-indigo-600', checked: true},
-                    {text: 'Тест шевеления плода (с 28 недель)', title: 'Самоконтроль', color: 'text-emerald-600', checked: true},
-                    {text: 'Коррекция диеты (белковое питание)', title: 'Нутритивная поддержка', color: 'text-amber-600', checked: true},
-                    {text: 'Госпитализация при нулевом/реверсном кровотоке', title: 'Экстренная тактика', color: 'text-red-700', checked: true}
+                    {text: 'Экспертная УЗ-допплерометрия (МА, АП)', category: 'Инструментальная диагностика', requiredLevel: 'high'},
+                    {text: 'Динамическая УЗ-фетометрия (интервал 14-21 день)', category: 'Инструментальная диагностика', requiredLevel: 'high'},
+                    {text: 'КТГ плода (с 26 недель при рисках)', category: 'Оценка состояния плода', requiredLevel: 'high'},
+                    {text: 'Коррекция диеты (белковое питание)', category: 'Профилактика и лечение', requiredLevel: 'high'},
+                    {text: 'Госпитализация (при нулевом/реверсном кровотоке)', category: 'Экстренная тактика', requiredLevel: 'severe'}
                 ]
             }
         ];
@@ -300,11 +267,8 @@
 
         function renderRiskFactorsBlock(inputs) {
             const activeFactors = RISK_FACTORS_RULES.filter(rule => rule.check(inputs));
-            
             if (activeFactors.length === 0) return ''; 
-
             activeFactors.sort((a, b) => b.or - a.or);
-
             const barsHTML = activeFactors.map(f => {
                 const width = Math.min((f.or / 5) * 100, 100); 
                 return `
@@ -319,7 +283,6 @@
                     </div>
                 `;
             }).join('');
-
             return `
                 <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-700 fade-in">
                     <div class="flex justify-between items-center mb-4">
@@ -327,9 +290,6 @@
                             Ведущие факторы риска (Отношение шансов)
                         </h3>
                     </div>
-                    <p class="text-[11px] text-slate-400 mb-5 leading-relaxed">
-                        Визуализация влияния факторов на результат прогнозирования. Значение OR (Odds Ratio) показывает кратность увеличения шансов развития патологии при наличии данного фактора.
-                    </p>
                     <div class="space-y-4">${barsHTML}</div>
                 </div>
             `;
@@ -341,11 +301,10 @@
             const recWrapper = document.getElementById('recommendations-wrapper');
             
             container.innerHTML = '';
-            
-            // 1. Рисуем блок факторов риска
             factorsContainer.innerHTML = renderRiskFactorsBlock(userInputs);
 
-            let allRecsHTML = '';
+            let hasAnyHighRisk = false;
+            let combinedRecsHTML = '';
             
             // 2. Рисуем карточки ПЭ и ЗРП
             MODELS_CONFIG.forEach(model => {
@@ -360,6 +319,7 @@
                 const badgeText = isHigh ? 'Высокий риск' : 'Низкий риск';
                 const textColor = isHigh ? 'rose' : 'emerald';
 
+                // Карточка
                 const cardHtml = `
                     <div class="bg-white border-l-8 ${borderClass} p-5 rounded-xl shadow-sm hover:shadow-md transition flex flex-col fade-in">
                         <div class="flex justify-between items-start mb-2">
@@ -380,30 +340,66 @@
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
 
-                // Собираем рекомендации только для высокого риска
+                // Генерация блока рекомендаций (только если высокий риск)
                 if (isHigh) {
-                    const items = model.checkList.map(item => `
-                        <label class="flex items-start p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition">
-                            <input type="checkbox" ${item.checked ? 'checked' : ''} class="mt-1 w-4 h-4 text-indigo-600 rounded mr-3">
-                            <div class="text-[11px]">
-                                <span class="font-bold block uppercase ${item.color} mb-0.5 leading-none">${item.title}</span>
-                                ${item.text}
+                    hasAnyHighRisk = true;
+                    
+                    // Группировка по категориям
+                    const grouped = {};
+                    model.checkList.forEach(item => {
+                        if (!grouped[item.category]) grouped[item.category] = [];
+                        grouped[item.category].push(item);
+                    });
+
+                    let groupHTML = '';
+                    for (const [category, items] of Object.entries(grouped)) {
+                        const itemsHTML = items.map(item => {
+                            // Логика "Умной галочки":
+                            // Галочка ставится если:
+                            // 1. Уровень требования 'high' И есть высокий риск (а он есть, раз мы в if(isHigh))
+                            // 2. Уровень требования 'severe' И риск тяжелый (isSevere)
+                            const isChecked = (item.requiredLevel === 'high') || (item.requiredLevel === 'severe' && isSevere);
+                            const opacityClass = isChecked ? '' : 'opacity-60 grayscale'; // Визуально гасим неактивные
+
+                            return `
+                                <label class="flex items-start p-2 hover:bg-gray-50 rounded cursor-pointer transition ${opacityClass}">
+                                    <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 w-4 h-4 text-indigo-600 rounded mr-3">
+                                    <span class="text-[11px] leading-tight text-slate-700">${item.text}</span>
+                                </label>
+                            `;
+                        }).join('');
+
+                        groupHTML += `
+                            <div class="mb-3 last:mb-0">
+                                <h6 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 pl-2 border-l-2 border-indigo-200">${category}</h6>
+                                <div class="space-y-0.5">
+                                    ${itemsHTML}
+                                </div>
                             </div>
-                        </label>
-                    `).join('');
-                    allRecsHTML += items;
+                        `;
+                    }
+
+                    combinedRecsHTML += `
+                        <div class="bg-slate-50 p-4 border-b last:border-b-0 border-gray-100">
+                             <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-indigo-100 text-indigo-700 text-[9px] font-black px-1.5 py-0.5 rounded">КР МЗ РФ</span>
+                                <h5 class="text-xs font-bold text-indigo-900 leading-tight hover:underline cursor-pointer" title="Нажмите, чтобы открыть текст КР">${model.crRef}</h5>
+                             </div>
+                             ${groupHTML}
+                        </div>
+                    `;
                 }
             });
 
-            // 3. Рисуем рекомендации (Сетка чек-боксов)
-            if (allRecsHTML) {
+            // 3. Рисуем общий блок тактики
+            if (hasAnyHighRisk && combinedRecsHTML) {
                 recWrapper.innerHTML = `
-                    <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <div class="p-4 bg-white border-b border-gray-100 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                         <h4 class="font-black text-sm uppercase text-slate-800 tracking-tight">Заключительное медицинское решение и тактика</h4>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        ${allRecsHTML}
+                    <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                        ${combinedRecsHTML}
                     </div>
                 `;
                 recWrapper.classList.remove('hidden');
@@ -421,7 +417,7 @@
             
             trigger.addEventListener('click', async () => {
                 const originalText = trigger.innerHTML;
-                trigger.innerHTML = '<span class="animate-pulse tracking-widest uppercase">Идет расчет...</span>';
+                trigger.innerHTML = '<span class="animate-pulse tracking-widest uppercase">CDSS Analyzing...</span>';
                 trigger.disabled = true;
 
                 const inputs = {
@@ -450,15 +446,14 @@
                     const data = await response.json();
 
                     emptyState.classList.add('hidden');
-                    // Исправлено: обращаемся к контейнеру, который точно существует
                     document.getElementById('results-container').classList.remove('hidden');
                     renderResults(data, inputs);
 
-                    // Генерация протокола с полными данными, включая ID и Срок из шапки
+                    // Генерация протокола
                     const pName = document.getElementById('header-name').value;
                     const pWeeks = document.getElementById('header-weeks').value;
                     const pDoctor = document.getElementById('header-doctor').value;
-                    const pId = document.getElementById('header-id').value; // Получаем ID
+                    const pId = document.getElementById('header-id').value;
                     
                     const probPE = data.pe_risk;
                     const probFGR = data.fgr_risk;
@@ -466,25 +461,20 @@
                     const expertText = `ЗАКЛЮЧЕНИЕ CDSS (Clinical Decision Support System):
 
 1. ПАСПОРТНАЯ ЧАСТЬ И АНАМНЕЗ:
-Пациентка: ${pName}
-ID ПроМед/ЕЦП: ${pId}
-Срок беременности: ${pWeeks}
-Возраст: ${inputs.age} лет. Паритет: ${inputs.parity}.
-ИМТ: ${inputs.bmi}. Курение: ${inputs.smoking}.
-Отягощенный анамнез: ПЭ - ${inputs.pe_hist}, ЗРП - ${inputs.fgr_hist}.
-Соматика: Хроническая АГ - ${inputs.hag}, Патология почек - ${inputs.kidney}.
-Данные I скрининга: риск ПЭ ${inputs.scr_pe}, риск ЗРП ${inputs.scr_fgr}.
+Пациентка: ${pName} (ID: ${pId})
+Срок: ${pWeeks}. Возраст: ${inputs.age}. ИМТ: ${inputs.bmi}.
+Факторы риска: ПЭ в анамнезе (${inputs.pe_hist}), ХАГ (${inputs.hag}), Патология почек (${inputs.kidney}).
 
 2. РЕЗУЛЬТАТ АНАЛИЗА ML-МОДЕЛИ:
-${probPE > 0.57 || probFGR > 0.39 ? '⚠️ ВЫЯВЛЕН ВЫСОКИЙ РИСК акушерских осложнений.' : '✅ Низкий риск осложнений.'}
-- Вероятность преэклампсии: ${(probPE*100).toFixed(1)}% (Порог 57%)
-- Вероятность задержки роста плода: ${(probFGR*100).toFixed(1)}% (Порог 39%)
+${probPE > 0.57 || probFGR > 0.39 ? '⚠️ ВЫСОКИЙ РИСК ОСЛОЖНЕНИЙ' : '✅ НИЗКИЙ РИСК'}
+- ПЭ: ${(probPE*100).toFixed(1)}% (Порог 57%)
+- ЗРП: ${(probFGR*100).toFixed(1)}% (Порог 39%)
 
-3. ТАКТИЧЕСКИЕ РЕКОМЕНДАЦИИ (в соответствии с КР МЗ РФ):
-А) Профилактика ПЭ (КР 2021): ${probPE > 0.57 ? 'Назначить АСК 150 мг на ночь. Контроль АД, протеинурии.' : 'Специфическая профилактика не показана.'}
-Б) Мониторинг ЗРП (КР 2022): ${probFGR > 0.39 ? 'Экспертная УЗ-допплерометрия, фетометрия каждые 14-21 день.' : 'Рутинный мониторинг.'}
+3. РЕКОМЕНДАЦИИ (КР МЗ РФ):
+${probPE > 0.57 ? '- Назначить АСК 150 мг/сут.\n- Контроль АД и протеинурии.' : '- Специфическая профилактика ПЭ не показана.'}
+${probFGR > 0.39 ? '- УЗ-допплерометрия и фетометрия (14-21 дн).' : '- Рутинный мониторинг.'}
 
-Лечащий врач: ${pDoctor}`;
+Врач: ${pDoctor}`;
 
                     cdssOutput.innerText = expertText;
                     document.getElementById('input-column').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -521,4 +511,3 @@ ${probPE > 0.57 || probFGR > 0.39 ? '⚠️ ВЫЯВЛЕН ВЫСОКИЙ РИС
     </script>
 </body>
 </html>
-
