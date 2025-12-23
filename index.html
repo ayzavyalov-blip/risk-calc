@@ -407,8 +407,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const trigger = document.getElementById('calc-trigger');
             
-            // --- ИСПРАВЛЕНИЕ: Используем правильный ID (results-container) ---
-            const resultsContent = document.getElementById('results-container'); 
+            // ID должен совпадать с тем, что в HTML (строка ~170)
+            const resultsContent = document.getElementById('results-content');
             const emptyState = document.getElementById('results-empty');
             const cdssOutput = document.getElementById('cdss-generated-text');
             const doctorComment = document.getElementById('doctor-comment');
@@ -506,4 +506,5 @@
     </script>
 </body>
 </html>
+
 
