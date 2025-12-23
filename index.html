@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клинический калькулятор риска преэклампсии и задержки роста плода (CDSS)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .overflow-y-auto::-webkit-scrollbar { width: 6px; }
+        .overflow-y-auto::-webkit-scrollbar-track { background: #f1f5f9; }
+        .overflow-y-auto::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .active-mode { border-color: #4f46e5; background-color: #eef2ff; color: #4338ca; border-width: 2px; }
+        .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 2% auto; padding: 25px; border: 1px solid #888; width: 90%; max-width: 850px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        @keyframes pulse-blue { 0%, 100% { background-color: #eff6ff; } 50% { background-color: #dbeafe; } }
+        .loading-mis { animation: pulse-blue 1.5s infinite; }
+        .recommended-action { border-color: #4f46e5; background-color: #f5f3ff; box-shadow: 0 0 0 1px #4f46e5; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8 h-screen overflow-hidden text-gray-900 font-sans text-[13px]">
+
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col h-full border border-gray-200">
+        
+        <div class="p-5 border-b border-gray-200 bg-white text-center">
+            <h1 class="text-xl font-bold text-gray-900 uppercase tracking-wide">
+                Клинический калькулятор риска преэклампсии и задержки роста плода
+                <span class="block text-sm font-normal normal-case text-gray-500 mt-1">Система поддержки принятия врачебных решений на основе ансамблевых моделей машинного обучения</span>
+            </h1>
+        </div>
+        
+        <header class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm flex-1 w-full text-[12px]">
+                <div class="space-y-1">
+                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">ФИО Пациентки:</label>
+                    <input type="text" id="header-name" value="Иванова Мария Ивановна" class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-bold text-gray-800 py-0.5">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">Срок беременности:</label>
+                    <input type="text" id="header-weeks" value="12 недель 3 дня" class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-bold text-gray-800 py-0.5">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">Врач (ФИО):</label>
+                    <input type="text" id="header-doctor" value="Петров В.В." class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-bold text-gray-800 py-0.5">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-500 block uppercase text-[9px] font-black tracking-tighter">ID ПроМед/ЕЦП:</label>
+                    <input type="text" id="header-id" value="7701-12345678" class="w-full bg-transparent border-b border-gray-200 focus:border-indigo-500 outline-none font-medium text-gray-800 py-0.5">
+                </div>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <button id="import-mis" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black py-2.5 px-4 rounded-lg uppercase transition flex items-center justify-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Импорт из МИС
+                </button>
+            </div>
+        </header>
+
+        <main class="flex flex-col md:flex-row flex-1 overflow-hidden text-balance">
+            <div id="input-column" class="w-full md:w-5/12 p-6 border-r border-gray-200 overflow-y-auto bg-white transition-colors duration-300">
+                <form id="ml-input-form" class="space-y-6">
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-indigo-700 border-b-2 border-indigo-100 pb-1 uppercase tracking-wider text-[13px]">Клинико-анамнестические данные</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Возраст матери</label><input type="number" id="inp-age" value="35" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm focus:ring-indigo-500"></div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Число родов (паритет)</label><input type="number" id="inp-parity" value="1" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm focus:ring-indigo-500"></div>
+                            <div class="col-span-2">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Интергравидарный интервал</label>
+                                <select id="inp-interval" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>От 6 до 60 месяцев</option><option>Менее 6 месяцев</option><option>Более 60 месяцев</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ПЭ в анамнезе</label>
+                                <select id="inp-pe-hist" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Нет</option><option>Да</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ЗРП в анамнезе</label>
+                                <select id="inp-fgr-hist" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Нет</option><option>Да</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-indigo-700 border-b-2 border-indigo-100 pb-1 uppercase tracking-wider text-[13px]">Соматический и нутритивный статус</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Хроническая АГ</label><select id="inp-hag" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Да</option><option>Нет</option></select></div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Болезни почек</label><select id="inp-kidney" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Нет</option><option>Да</option></select></div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">ИМТ до бер-ти</label><input type="text" id="inp-bmi" value="31.2" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Прибавка массы тела</label>
+                                <select id="inp-gain" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Меньше рекомендуемой нормы</option><option>Соответствует норме</option><option>Больше рекомендуемой нормы</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pb-24">
+                        <h3 class="font-bold text-indigo-700 border-b-2 border-indigo-100 pb-1 uppercase tracking-wider text-[13px]">Скрининг I триместра и образ жизни</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Риск ПЭ (скрининг)</label><input type="text" id="inp-scr-pe" placeholder="Напр. 1:150" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"></div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Риск ЗРП (скрининг)</label><input type="text" id="inp-scr-fgr" placeholder="Напр. 1:80" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"></div>
+                            <div class="col-span-2">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Статус курения</label>
+                                <select id="inp-smoking" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm"><option>Курит</option><option>Не курит</option><option>Бросила</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t sticky bottom-0 bg-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+                        <div class="mb-4">
+                            <label class="block text-xs font-black text-gray-800 mb-2 uppercase text-[11px] tracking-tighter">Режим работы клинических порогов:</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" id="mode-screening" class="py-2.5 px-2 text-[10px] font-black border rounded-lg uppercase transition active-mode leading-tight">Скрининговый режим<br><span class="font-medium normal-case text-gray-500">Женская консультация</span></button>
+                                <button type="button" id="mode-tactical" class="py-2.5 px-2 text-[10px] font-black border border-gray-300 rounded-lg uppercase text-gray-500 transition hover:bg-gray-50 leading-tight">Тактический режим<br><span class="font-medium normal-case text-gray-500">Акушерский стационар</span></button>
+                            </div>
+                        </div>
+                        <button id="calc-trigger" type="button" class="w-full py-4 bg-indigo-600 text-white font-black rounded-xl shadow-lg hover:bg-indigo-700 transition uppercase tracking-widest text-sm flex items-center justify-center gap-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h3m-3-10h.01M9 17h.01M12 17h.01M15 17h.01M9 14h.01M12 14h.01M15 14h.01M9 11h.01M12 11h.01M15 11h.01M12 4a1 1 0 011 1v1a1 1 0 01-2 0V5a1 1 0 011-1z"></path></svg>
+                            Рассчитать клинический риск
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="w-full md:w-7/12 p-6 bg-gray-50 overflow-y-auto">
+                <div id="results-content" class="hidden space-y-6">
+                    
+                    <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-700 text-balance">
+                        <h3 class="text-base font-bold uppercase tracking-tight text-indigo-400 mb-4">Ведущие факторы риска (Отношение шансов)</h3>
+                        <p class="text-[11px] text-slate-400 mb-5 leading-relaxed">Визуализация влияния факторов. Значение OR (Odds Ratio) показывает кратность увеличения шансов развития патологии.</p>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] mb-1"><span>Индекс массы тела (Высокий)</span><span class="text-rose-400 font-bold">OR: 3.5</span></div>
+                                <div class="h-2.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" style="width: 75%"></div></div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[11px] mb-1"><span>Наличие хронической артериальной гипертензии</span><span class="text-rose-400 font-bold">OR: 2.8</span></div>
+                                <div class="h-2.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" style="width: 60%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 text-balance">
+                        <div class="bg-white border-l-8 border-rose-600 p-5 rounded-xl shadow-sm hover:shadow-md transition flex flex-col">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-black text-slate-800 uppercase text-xs">Преэклампсия (ПЭ)</h4>
+                                <div class="flex flex-col items-end gap-1 text-right">
+                                    <span id="label-pe-risk" class="hidden bg-rose-100 text-rose-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Высокий риск</span>
+                                    <span id="label-severe-pe" class="hidden bg-red-800 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase animate-pulse">Риск тяжелой ПЭ</span>
+                                </div>
+                            </div>
+                            <div class="text-4xl font-black text-rose-600 mb-2" id="val-pe">--%</div>
+                            <div class="p-3 bg-rose-50 border border-rose-100 rounded-lg text-[10px] text-slate-700 mb-3 leading-tight flex-1">
+                                <strong>Обоснование:</strong> КР Минздрава России «Преэклампсия...» (2023), <strong>Раздел 5 «Профилактика»</strong>.
+                            </div>
+                            <button onclick="openModal('modal-pe-info')" class="text-[9px] font-black text-indigo-600 uppercase hover:underline text-left mt-2 tracking-tighter">Подробнее о модели ПЭ →</button>
+                        </div>
+
+                        <div class="bg-white border-l-8 border-rose-600 p-5 rounded-xl shadow-sm hover:shadow-md transition flex flex-col">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-black text-slate-800 uppercase text-xs">Задержка роста плода</h4>
+                                <span id="label-fgr-risk" class="hidden bg-rose-100 text-rose-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">Высокий риск</span>
+                            </div>
+                            <div class="text-4xl font-black text-rose-600 mb-2" id="val-fgr">--%</div>
+                            <div class="p-3 bg-rose-50 border border-rose-100 rounded-lg text-[10px] text-slate-700 mb-3 leading-tight flex-1">
+                                <strong>Обоснование:</strong> КР Минздрава России «Задержка роста плода» (2022), <strong>Раздел 2.4</strong>.
+                            </div>
+                            <button onclick="openModal('modal-fgr-info')" class="text-[9px] font-black text-indigo-600 uppercase hover:underline text-left mt-2 tracking-tighter">Подробнее о модели ЗРП →</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border-2 border-indigo-100 shadow-lg space-y-6 text-balance">
+                        <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
+                            <h4 class="font-black text-sm uppercase text-slate-800 tracking-tight">Тактическое решение и назначения</h4>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div id="block-pe-actions" class="p-4 border border-gray-200 rounded-xl transition duration-300">
+                                <h5 class="font-black text-[10px] uppercase text-rose-600 mb-3 flex items-center">
+                                    <span class="mr-2">Профилактика ПЭ (КР ПЭ Разд. 5)</span>
+                                    <span class="hidden bg-rose-600 text-white px-2 py-0.5 rounded-full text-[8px]" id="pe-rec-badge">⭐ Рекомендовано CDSS</span>
+                                </h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
+                                    <label class="flex items-center text-[11px] cursor-pointer"><input type="checkbox" id="check-pe-1" class="w-3.5 h-3.5 mr-2"> АСК 150 мг на ночь до 36 нед.</label>
+                                    <label class="flex items-center text-[11px] cursor-pointer"><input type="checkbox" id="check-pe-2" class="w-3.5 h-3.5 mr-2"> Мониторинг АД</label>
+                                    <label class="flex items-center text-[11px] cursor-pointer"><input type="checkbox" id="check-pe-3" class="w-3.5 h-3.5 mr-2"> Дневник самоконтроля</label>
+                                    <label class="flex items-center text-[11px] cursor-pointer"><input type="checkbox" id="check-pe-4" class="w-3.5 h-3.5 mr-2"> Тест-полоски на белок</label>
+                                </div>
+                            </div>
+                            <div id="block-fgr-actions" class="p-4 border border-gray-200 rounded-xl transition duration-300">
+                                <h5 class="font-black text-[10px] uppercase text-rose-600 mb-3 flex items-center">
+                                    <span class="mr-2 tracking-tighter">Мониторинг ЗРП (КР ЗРП Разд. 2.4)</span>
+                                    <span class="hidden bg-rose-600 text-white px-2 py-0.5 rounded-full text-[8px]" id="fgr-rec-badge">⭐ Рекомендовано CDSS</span>
+                                </h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
+                                    <label class="flex items-center text-[11px] cursor-pointer"><input type="checkbox" id="check-fgr-1" class="w-3.5 h-3.5 mr-2"> Допплерометрия в динамике</label>
+                                    <label class="flex items-center text-[11px] cursor-pointer"><input type="checkbox" id="check-fgr-2" class="w-3.5 h-3.5 mr-2"> Фетометрия</label>
+                                    <label class="flex items-center text-[11px] cursor-pointer"><input type="checkbox" id="check-fgr-3" class="w-3.5 h-3.5 mr-2"> КТГ еженедельно</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-xl space-y-4 text-balance">
+                        <div class="flex items-center justify-between border-b border-indigo-700 pb-3">
+                            <h4 class="font-bold text-sm uppercase tracking-wider">Протокол CDSS</h4>
+                            <button onclick="openModal('modal-cdss-info')" class="text-[10px] text-indigo-300 hover:text-white underline underline-offset-4 font-black uppercase">Подробнее →</button>
+                        </div>
+                        <div id="cdss-generated-text" class="text-[12px] leading-relaxed opacity-95 whitespace-pre-wrap font-normal tracking-tight"></div>
+                        <div class="pt-2">
+                            <button id="copy-to-comment" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black py-2 px-5 rounded-xl uppercase transition border border-indigo-500 flex items-center gap-2">
+                                Принять экспертное мнение CDSS (копировать вниз)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-md space-y-5">
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-black text-gray-500 uppercase tracking-tighter">Комментарии и особые отметки врача:</label>
+                            <textarea id="doctor-comment" class="w-full text-[13px] text-gray-800 leading-normal border-gray-300 rounded-2xl focus:ring-indigo-500 h-32 p-4 bg-white shadow-inner" placeholder="Введите ваши примечания..."></textarea>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button id="btn-protocol" class="flex-1 bg-indigo-600 text-white font-black text-[12px] py-4 rounded-xl uppercase hover:bg-indigo-700 shadow-lg transition">Сформировать протокол</button>
+                            <button id="btn-export" class="flex-1 bg-white border-2 border-indigo-600 text-indigo-600 font-black text-[12px] py-4 rounded-xl uppercase hover:bg-indigo-50 transition">Экспорт в ЭМК МИС</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="results-empty" class="h-full flex flex-col items-center justify-center text-slate-400 text-center px-10">
+                    <div class="bg-white p-12 rounded-[2.5rem] shadow-sm border border-slate-100 max-w-md">
+                        <p class="text-xl font-black text-slate-800 mb-4 uppercase tracking-wide">CDSS готов к анализу</p>
+                        <p class="text-[13px] text-slate-400 leading-relaxed text-balance">Заполните клинические данные и нажмите кнопку «Рассчитать», чтобы сформировать тактику и протокол CDSS.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-cdss-info" class="modal"><div class="modal-content"><h2 class="text-xl font-bold mb-4">CDSS Info</h2><p>Инфо...</p><button onclick="closeModal('modal-cdss-info')" class="mt-4 p-2 bg-gray-200 rounded">Закрыть</button></div></div>
+    <div id="modal-pe-info" class="modal"><div class="modal-content"><h2 class="text-xl font-bold mb-4">PE Info</h2><p>Инфо...</p><button onclick="closeModal('modal-pe-info')" class="mt-4 p-2 bg-gray-200 rounded">Закрыть</button></div></div>
+    <div id="modal-fgr-info" class="modal"><div class="modal-content"><h2 class="text-xl font-bold mb-4">FGR Info</h2><p>Инфо...</p><button onclick="closeModal('modal-fgr-info')" class="mt-4 p-2 bg-gray-200 rounded">Закрыть</button></div></div>
+
+    <script>
+        // === ВАЖНО: Вставьте сюда ссылку из Colab (например, https://xxxx.ngrok-free.app) ===
+        const API_URL = "https://bbao7sb3qb98qg2cso0r.containers.yandexcloud.net/predict"; 
+        // ===================================================================================
+
+        function openModal(id) { document.getElementById(id).style.display = "block"; }
+        function closeModal(id) { document.getElementById(id).style.display = "none"; }
+        window.onclick = function(event) { if (event.target.className === 'modal') { event.target.style.display = "none"; } }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const trigger = document.getElementById('calc-trigger');
+            const resultsContent = document.getElementById('results-content');
+            const emptyState = document.getElementById('results-empty');
+            const cdssOutput = document.getElementById('cdss-generated-text');
+            const doctorComment = document.getElementById('doctor-comment');
+            
+            const THRESHOLDS = { PE: { screen: 0.57, tactical: 0.80 }, FGR: { screen: 0.39, tactical: 0.70 }, SEVERE: 0.65 };
+
+            trigger.addEventListener('click', async () => {
+                // UI: Загрузка
+                trigger.innerHTML = '<span class="animate-pulse tracking-widest uppercase">CDSS Connecting...</span>';
+                trigger.disabled = true;
+
+                // Сбор данных
+                const formData = {
+                    age: document.getElementById('inp-age').value,
+                    parity: document.getElementById('inp-parity').value,
+                    interval: document.getElementById('inp-interval').value,
+                    pe_hist: document.getElementById('inp-pe-hist').value,
+                    fgr_hist: document.getElementById('inp-fgr-hist').value,
+                    hag: document.getElementById('inp-hag').value,
+                    kidney: document.getElementById('inp-kidney').value,
+                    bmi: document.getElementById('inp-bmi').value,
+                    gain: document.getElementById('inp-gain').value,
+                    smoking: document.getElementById('inp-smoking').value,
+                    scr_pe: document.getElementById('inp-scr-pe').value,
+                    scr_fgr: document.getElementById('inp-scr-fgr').value
+                };
+
+                try {
+                    // ЗАПРОС К COLAB
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (!response.ok) throw new Error('Network error');
+                    const data = await response.json();
+                    
+                    if (data.error) { throw new Error(data.error); }
+
+                    // ПОЛУЧЕНИЕ ВЕРОЯТНОСТЕЙ
+                    const probPE = data.pe_risk;
+                    const probFGR = data.fgr_risk;
+
+                    // ОБНОВЛЕНИЕ UI
+                    emptyState.classList.add('hidden');
+                    resultsContent.classList.remove('hidden');
+                    trigger.innerText = 'ОБНОВИТЬ КЛИНИЧЕСКИЙ ПРОГНОЗ';
+                    trigger.disabled = false;
+
+                    // Вывод цифр
+                    document.getElementById('val-pe').innerText = (probPE * 100).toFixed(1) + '%';
+                    document.getElementById('val-fgr').innerText = (probFGR * 100).toFixed(1) + '%';
+                    
+                    // Логика порогов
+                    const isScreening = document.getElementById('mode-screening').classList.contains('active-mode');
+                    const mode = isScreening ? 'screen' : 'tactical';
+
+                    // Сброс стилей
+                    document.getElementById('label-pe-risk').classList.add('hidden');
+                    document.getElementById('label-severe-pe').classList.add('hidden');
+                    document.getElementById('block-pe-actions').classList.remove('recommended-action');
+                    document.getElementById('pe-rec-badge').classList.add('hidden');
+
+                    document.getElementById('label-fgr-risk').classList.add('hidden');
+                    document.getElementById('block-fgr-actions').classList.remove('recommended-action');
+                    document.getElementById('fgr-rec-badge').classList.add('hidden');
+
+                    // Активация рекомендаций ПЭ
+                    if (probPE >= THRESHOLDS.PE[mode]) {
+                        document.getElementById('label-pe-risk').classList.remove('hidden');
+                        document.getElementById('pe-rec-badge').classList.remove('hidden');
+                        document.getElementById('block-pe-actions').classList.add('recommended-action');
+                        document.getElementById('check-pe-1').checked = true;
+                        document.getElementById('check-pe-2').checked = true;
+                    }
+                    if (probPE >= THRESHOLDS.SEVERE) { document.getElementById('label-severe-pe').classList.remove('hidden'); }
+
+                    // Активация рекомендаций ЗРП
+                    if (probFGR >= THRESHOLDS.FGR[mode]) {
+                        document.getElementById('label-fgr-risk').classList.remove('hidden');
+                        document.getElementById('fgr-rec-badge').classList.remove('hidden');
+                        document.getElementById('block-fgr-actions').classList.add('recommended-action');
+                        document.getElementById('check-fgr-1').checked = true;
+                        document.getElementById('check-fgr-2').checked = true;
+                    }
+
+                    // Генерация текста протокола
+                    const pName = document.getElementById('header-name').value;
+                    const expertText = `ЗАКЛЮЧЕНИЕ CDSS (Clinical Decision Support System):
+Пациентка: ${pName}
+Результат анализа:
+- Риск ПЭ: ${(probPE*100).toFixed(1)}% (${probPE >= THRESHOLDS.PE[mode] ? 'ВЫСОКИЙ' : 'НИЗКИЙ'})
+- Риск ЗРП: ${(probFGR*100).toFixed(1)}% (${probFGR >= THRESHOLDS.FGR[mode] ? 'ВЫСОКИЙ' : 'НИЗКИЙ'})
+
+ОБОСНОВАНИЕ: Прогноз сформирован на основании ансамблевой модели RandomForest.
+ТАКТИЧЕСКИЕ РЕКОМЕНДАЦИИ (в соответствии с КР МЗ РФ):
+${probPE >= THRESHOLDS.PE[mode] ? '1. Профилактика ПЭ (Разд. 5 КР ПЭ): АСК 150 мг на ночь до 36 нед.\n' : ''}${probFGR >= THRESHOLDS.FGR[mode] ? '2. Мониторинг ЗРП (Разд. 2.4 КР ЗРП): Экспертная УЗ-допплерометрия, фетометрия.' : ''}`;
+
+                    cdssOutput.innerText = expertText;
+                    resultsContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                } catch (e) {
+                    alert("Ошибка связи с Colab: " + e.message + "\nУбедитесь, что Colab запущен и ссылка API_URL верная.");
+                    trigger.innerText = 'ОШИБКА СВЯЗИ';
+                    trigger.disabled = false;
+                    console.error(e);
+                }
+            });
+
+            // Остальные обработчики (копирование, режимы, импорт)
+            document.getElementById('copy-to-comment').addEventListener('click', () => { doctorComment.value = cdssOutput.innerText; doctorComment.focus(); });
+            const btnScreening = document.getElementById('mode-screening');
+            const btnTactical = document.getElementById('mode-tactical');
+            btnScreening.addEventListener('click', () => { btnScreening.classList.add('active-mode'); btnTactical.classList.remove('active-mode'); });
+            btnTactical.addEventListener('click', () => { btnTactical.classList.add('active-mode'); btnScreening.classList.remove('active-mode'); });
+            document.getElementById('import-mis').addEventListener('click', function() {
+                this.innerHTML = 'ЗАГРУЗКА...';
+                document.getElementById('input-column').classList.add('loading-mis');
+                setTimeout(() => {
+                    document.getElementById('input-column').classList.remove('loading-mis');
+                    this.innerHTML = 'ДАННЫЕ ЗАГРУЖЕНЫ';
+                    document.getElementById('inp-scr-pe').value = '1:125';
+                    document.getElementById('inp-scr-fgr').value = '1:60';
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>
