@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* Настройка шрифтов и цветов согласно Варианту A */
-        body { font-family: 'Montserrat', sans-serif; background-color: #F9FAFB; color: #111827; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #F9FAFB; color: #111827; display: flex; flex-direction: column; min-height: 100vh; }
         
         /* Скроллбар */
         .overflow-y-auto::-webkit-scrollbar { width: 6px; }
@@ -39,13 +39,24 @@
             border-color: #3B82F6;
             box-shadow: 0 0 0 1px #3B82F6;
         }
+
+        /* Disabled inputs styling */
+        input:disabled, select:disabled {
+            background-color: #F3F4F6;
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        /* Стилизация details/summary для блока питания */
+        details > summary { list-style: none; cursor: pointer; }
+        details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
-<body class="p-4 md:p-8 h-screen overflow-hidden text-[13px]">
+<body class="p-4 md:p-8 overflow-hidden text-[13px]">
 
-    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col h-full border border-gray-200">
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col h-full border border-gray-200 flex-1">
         
-        <div class="p-5 border-b border-gray-200 bg-white text-center">
+        <div class="p-5 border-b border-gray-200 bg-white text-center flex-shrink-0">
             <h1 class="text-xl font-bold text-[#111827] uppercase tracking-wide">
                 Клинический калькулятор риска преэклампсии и задержки роста плода
                 <span class="block text-sm font-normal normal-case text-[#6B7280] mt-1">
@@ -54,15 +65,26 @@
             </h1>
         </div>
         
-        <header class="px-6 py-4 border-b border-gray-200 bg-[#F9FAFB] flex flex-col md:flex-row justify-between items-center gap-4">
+        <header class="px-6 py-4 border-b border-gray-200 bg-[#F9FAFB] flex flex-col md:flex-row justify-between items-center gap-4 flex-shrink-0">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm flex-1 w-full text-[12px]">
                 <div class="space-y-1">
                     <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">ФИО Пациентки:</label>
                     <input type="text" id="header-name" value="Иванова Мария Ивановна" class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 font-bold text-[#111827] py-0.5">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">Срок (нед. дн.):</label>
-                    <input type="text" id="header-weeks" value="12 нед. 3 дня" class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 font-bold text-[#111827] py-0.5">
+                    <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">Срок беременности:</label>
+                    <select id="header-weeks" class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 font-bold text-[#111827] py-0.5">
+                        <option value="4-6">4-6 недель</option>
+                        <option value="7-9">7-9 недель</option>
+                        <option value="10-12">10-12 недель</option>
+                        <option value="13-16" selected>13-16 недель</option>
+                        <option value="17-20">17-20 недель</option>
+                        <option value="21-24">21-24 недель</option>
+                        <option value="25-28">25-28 недель</option>
+                        <option value="29-32">29-32 недель</option>
+                        <option value="33-36">33-36 недель</option>
+                        <option value="37+">≥37 недель</option>
+                    </select>
                 </div>
                 <div class="space-y-1">
                     <label class="text-[#6B7280] block uppercase text-[9px] font-black tracking-tighter">Врач (ФИО):</label>
@@ -89,11 +111,18 @@
                             <h3 class="font-bold text-[#3B82F6] text-sm uppercase tracking-wider">Клинико-анамнестические данные</h3>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Возраст матери</label><input type="number" id="inp-age" value="35" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
-                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Число родов (паритет)</label><input type="number" id="inp-parity" value="1" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-[#6B7280] mb-1">Возраст матери (15-50)</label>
+                                <input type="number" id="inp-age" value="35" min="15" max="50" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2">
+                                <span id="age-error" class="text-[10px] text-red-500 hidden">Возраст вне репродуктивного диапазона</span>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-[#6B7280] mb-1">Число родов (паритет)</label>
+                                <input type="number" id="inp-parity" value="1" min="0" max="10" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2">
+                            </div>
                             <div class="col-span-2">
                                 <label class="block text-xs font-bold text-[#6B7280] mb-1">Интергравидарный интервал</label>
-                                <select id="inp-interval" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>От 6 до 60 месяцев</option><option>Менее 6 месяцев</option><option>Более 60 месяцев</option></select>
+                                <select id="inp-interval" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option value="norm">От 6 до 60 месяцев</option><option value="short">Менее 6 месяцев</option><option value="long">Более 60 месяцев</option><option value="none">Нет (первые роды)</option></select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-[#6B7280] mb-1">ПЭ в анамнезе</label>
@@ -108,13 +137,34 @@
 
                     <div class="space-y-4">
                         <h3 class="font-bold text-[#3B82F6] border-b-2 border-blue-100 pb-1 text-sm uppercase tracking-wider">Соматический статус</h3>
+                        
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                                <input type="checkbox" id="inp-weight-known" checked class="text-blue-600 rounded focus:ring-blue-500">
+                                <span class="text-xs font-bold text-[#111827]">Известна масса тела до беременности</span>
+                            </label>
+                            
+                            <div id="weight-fields" class="grid grid-cols-2 gap-3 transition-opacity duration-200">
+                                <div><label class="block text-[10px] font-bold text-[#6B7280] mb-1">ИМТ до бер-ти</label><input type="text" id="inp-bmi" value="31.2" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-[#6B7280] mb-1">Прибавка веса</label>
+                                    <select id="inp-gain" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Меньше рекомендуемой нормы</option><option selected>Соответствует норме</option><option>Больше рекомендуемой нормы</option></select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Хроническая АГ</label><select id="inp-hag" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Да</option><option>Нет</option></select></div>
                             <div><label class="block text-xs font-bold text-[#6B7280] mb-1">Болезни почек</label><select id="inp-kidney" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Нет</option><option>Да</option></select></div>
-                            <div><label class="block text-xs font-bold text-[#6B7280] mb-1">ИМТ до бер-ти</label><input type="text" id="inp-bmi" value="31.2" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"></div>
-                            <div>
-                                <label class="block text-xs font-bold text-[#6B7280] mb-1">Прибавка массы тела</label>
-                                <select id="inp-gain" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm p-2"><option>Меньше рекомендуемой нормы</option><option>Соответствует норме</option><option>Больше рекомендуемой нормы</option></select>
+                            
+                            <div class="col-span-2">
+                                <label class="flex items-center gap-2 p-2 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition" id="gag-container" title="Активно только при сроке ≥20 недель">
+                                    <input type="checkbox" id="inp-gag" disabled class="text-blue-600 rounded focus:ring-blue-500 disabled:opacity-50">
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-[#111827]" id="gag-label">Гестационная АГ</span>
+                                        <span class="text-[9px] text-gray-500">Впервые после 20 нед (ISSHP, 2023)</span>
+                                    </div>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -169,6 +219,45 @@
                     <div id="risk-factors-block"></div>
 
                     <div id="cards-wrapper" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+                    
+                    <p class="text-[10px] text-gray-400 text-center italic mt-[-10px]">
+                        * Клинически вероятность наступления события не может быть абсолютной (100%). Значение скорректировано (BMJ, 2023).
+                    </p>
+
+                    <details class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden group">
+                        <summary class="p-4 flex items-center justify-between bg-blue-50/50 hover:bg-blue-50 transition">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-blue-100 p-1.5 rounded-lg text-blue-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                </div>
+                                <span class="text-sm font-bold text-gray-800">Рекомендации по белковому питанию</span>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="p-5 text-xs text-gray-600 leading-relaxed border-t border-blue-100">
+                            <p class="mb-3 font-medium">Адекватное белковое питание (>1,2 г/кг/сут) ассоциировано со снижением риска преэклампсии и улучшением фетоплацентарного кровотока (Nutrients, 2023; Cochrane, 2024). Рекомендуется ≥70–90 г/сут.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold text-gray-700 mb-2">🍗 Животные источники</h6>
+                                    <ul class="space-y-1 list-disc list-inside">
+                                        <li>Курица/индейка (100–150 г)</li>
+                                        <li>Рыба (100 г)</li>
+                                        <li>Творог 5–9% (150 г)</li>
+                                        <li>Кефир/молоко (200 мл)</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold text-gray-700 mb-2">🌱 Растительные источники</h6>
+                                    <ul class="space-y-1 list-disc list-inside">
+                                        <li>Чечевица (½ стакана)</li>
+                                        <li>Гречка (50 г сухой)</li>
+                                        <li>Тофу (100 г)</li>
+                                        <li>Миндаль/орехи (20 г)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
 
                     <div id="recommendations-wrapper" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden fade-in"></div>
 
@@ -204,11 +293,18 @@
                                 Экспорт в ЭМК МИС
                             </button>
                         </div>
+                        <p class="text-[10px] text-gray-400 text-center border-t pt-2">
+                            Результаты калькулятора носят рекомендательный характер и не заменяют очную консультацию врача-акушера-гинеколога (Приказ МЗ РФ № 911н).
+                        </p>
                     </div>
                 </div>
 
             </div>
         </main>
+        
+        <footer class="mt-4 text-center text-[10px] text-gray-400 border-t border-gray-200 pt-4 flex-shrink-0">
+            © 2025 | Клинический калькулятор рисков в акушерстве | Размещён в Yandex Cloud | Исходный код: <a href="https://github.com/ayzavyalov-blip/risk-calc" target="_blank" class="underline hover:text-blue-500">GitHub</a>
+        </footer>
     </div>
 
     <div id="modal-cdss-info" class="modal">
@@ -281,7 +377,7 @@
             {
                 id: 'pe',
                 title: 'Преэклампсия (ПЭ)',
-                crRef: 'КР МЗ РФ «Преэклампсия. Эклампсия. Отеки...» (2021)',
+                crRef: 'КР МЗ РФ «Преэклампсия...» (2021)',
                 threshold: 0.57, 
                 thresholdSevere: 0.80,
                 baseRef: 'Раздел 5 «Профилактика», Раздел 3 «Диагностика».',
@@ -297,15 +393,15 @@
             {
                 id: 'fgr',
                 title: 'Задержка роста плода (ЗРП)',
-                crRef: 'КР МЗ РФ «Недостаточный рост плода...» (2022)',
+                crRef: 'КР МЗ РФ «Задержка роста плода» (2024)',
                 threshold: 0.39,
                 thresholdSevere: 0.70,
-                baseRef: 'Раздел 2.4 «Инструментальные диагностические исследования».',
+                baseRef: 'Раздел 2.4 «Инструментальные исследования».',
                 checkList: [
                     {text: 'Экспертная УЗ-допплерометрия (МА, АП)', category: 'Инструментальная диагностика', requiredLevel: 'high'},
                     {text: 'Динамическая УЗ-фетометрия (интервал 14-21 день)', category: 'Инструментальная диагностика', requiredLevel: 'high'},
-                    {text: 'КТГ плода (с 26 недель при рисках)', category: 'Оценка состояния плода', requiredLevel: 'high'},
-                    {text: 'Коррекция диеты (белковое питание)', category: 'Профилактика и лечение', requiredLevel: 'high'},
+                    {text: 'КТГ с 26 недель (еженедельно; при ЗРП - 2 раза/нед)', category: 'Оценка состояния плода (FIGO 2023)', requiredLevel: 'high'},
+                    {text: 'Коррекция диеты (белковое питание ≥70г)', category: 'Профилактика и лечение', requiredLevel: 'high'},
                     {text: 'Госпитализация (при нулевом/реверсном кровотоке)', category: 'Экстренная тактика', requiredLevel: 'severe'}
                 ]
             }
@@ -345,7 +441,6 @@
                 `;
             }).join('');
             
-            // Фон: Темно-серый #1F2937, Текст: Белый
             return `
                 <div class="bg-[#1F2937] text-white p-6 rounded-2xl shadow-xl border border-gray-700 fade-in">
                     <div class="flex justify-between items-center mb-4">
@@ -369,24 +464,22 @@
             let hasAnyHighRisk = false;
             let combinedRecsHTML = '';
             
-            // 2. Рисуем карточки ПЭ и ЗРП
             MODELS_CONFIG.forEach(model => {
-                const prob = apiData[`${model.id}_risk`];
+                // Корректировка вероятности (max 0.99)
+                let prob = apiData[`${model.id}_risk`];
+                if (prob > 0.99) prob = 0.99;
+                
                 const percent = (prob * 100).toFixed(1) + '%';
                 const isHigh = prob >= model.threshold;
                 const isSevere = prob >= model.thresholdSevere;
                 const severityLabel = model.id === 'pe' ? 'ПЭ' : 'ЗРП';
 
-                // Цвета и стили согласно Варианту A
-                // Низкий риск: Фон #ECFDF5, Рамка #10B981, Текст #10B981
-                // Высокий риск: Фон #FEF2F2, Рамка #EF4444, Текст #EF4444
                 const bgColor = isHigh ? 'bg-[#FEF2F2]' : 'bg-[#ECFDF5]';
                 const borderColor = isHigh ? 'border-[#EF4444]' : 'border-[#10B981]';
                 const textColor = isHigh ? 'text-[#EF4444]' : 'text-[#10B981]';
                 const badgeText = isHigh ? 'ВЫСОКИЙ РИСК' : 'НИЗКИЙ РИСК';
                 const icon = isHigh ? '⚠️' : '🛡️';
 
-                // Карточка
                 const cardHtml = `
                     <div class="${bgColor} border-2 ${borderColor} p-6 rounded-xl shadow-sm hover:shadow-md transition flex flex-col fade-in">
                         <div class="flex justify-between items-start mb-2">
@@ -407,10 +500,8 @@
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
 
-                // Генерация блока рекомендаций (только если высокий риск)
                 if (isHigh) {
                     hasAnyHighRisk = true;
-                    
                     const grouped = {};
                     model.checkList.forEach(item => {
                         if (!grouped[item.category]) grouped[item.category] = [];
@@ -422,7 +513,6 @@
                         const itemsHTML = items.map(item => {
                             const isChecked = (item.requiredLevel === 'high') || (item.requiredLevel === 'severe' && isSevere);
                             const opacityClass = isChecked ? '' : 'opacity-50 grayscale';
-
                             return `
                                 <label class="flex items-start p-2 hover:bg-gray-50 rounded cursor-pointer transition ${opacityClass}">
                                     <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 w-4 h-4 text-[#3B82F6] rounded mr-3 border-gray-300 focus:ring-blue-500">
@@ -434,9 +524,7 @@
                         groupHTML += `
                             <div class="mb-4 last:mb-0">
                                 <h6 class="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider mb-2 pl-2 border-l-2 border-gray-200">${category}</h6>
-                                <div class="space-y-1">
-                                    ${itemsHTML}
-                                </div>
+                                <div class="space-y-1">${itemsHTML}</div>
                             </div>
                         `;
                     }
@@ -453,7 +541,6 @@
                 }
             });
 
-            // 3. Рисуем общий блок тактики
             if (hasAnyHighRisk && combinedRecsHTML) {
                 recWrapper.innerHTML = `
                     <div class="p-5 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
@@ -471,6 +558,62 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // === ЛОГИКА ИНТЕРФЕЙСА ===
+            const inpParity = document.getElementById('inp-parity');
+            const inpInterval = document.getElementById('inp-interval');
+            const inpWeightKnown = document.getElementById('inp-weight-known');
+            const weightFields = document.getElementById('weight-fields');
+            const inpWeeks = document.getElementById('header-weeks');
+            const inpGag = document.getElementById('inp-gag');
+            const gagLabel = document.getElementById('gag-label');
+            const gagContainer = document.getElementById('gag-container');
+
+            // 1. Интервал (Прочерк при первых родах)
+            inpParity.addEventListener('input', () => {
+                if (parseInt(inpParity.value) === 0) {
+                    inpInterval.value = 'none';
+                    inpInterval.disabled = true;
+                } else {
+                    inpInterval.disabled = false;
+                    if (inpInterval.value === 'none') inpInterval.value = 'norm';
+                }
+            });
+
+            // 2. Вес (Скрытие полей)
+            inpWeightKnown.addEventListener('change', () => {
+                if (inpWeightKnown.checked) {
+                    weightFields.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    weightFields.classList.add('opacity-50', 'pointer-events-none');
+                    document.getElementById('inp-gain').value = 'Соответствует норме'; // Сброс на нейтральное
+                }
+            });
+
+            // 3. ГАГ (Активно только >= 20 недель)
+            const updateGagState = () => {
+                // Индексы в select: 0-3 (до 16 нед), 4 (17-20), 5+ (21+)
+                // То есть >= 20 нед это опции начиная с индекса 5 (21-24), 
+                // но врач просил "после 20 недель". 17-20 включает 20. 
+                // Для надежности активируем с опции "21-24" (index 5) и "17-20" (index 4) считаем пограничной?
+                // ISSHP: hypertension arising > 20 weeks.
+                // Опции: 4-6, 7-9, 10-12, 13-16, 17-20, 21-24...
+                // Будем активировать, если выбрано "21-24" или выше.
+                if (inpWeeks.selectedIndex >= 5) {
+                    inpGag.disabled = false;
+                    gagContainer.classList.remove('opacity-50', 'cursor-not-allowed');
+                    gagLabel.classList.remove('text-gray-400');
+                    gagLabel.classList.add('text-[#111827]');
+                } else {
+                    inpGag.disabled = true;
+                    inpGag.checked = false;
+                    gagContainer.classList.add('opacity-50', 'cursor-not-allowed');
+                    gagLabel.classList.remove('text-[#111827]');
+                    gagLabel.classList.add('text-gray-400');
+                }
+            };
+            inpWeeks.addEventListener('change', updateGagState);
+            updateGagState(); // init
+
             const trigger = document.getElementById('calc-trigger');
             const resultsContent = document.getElementById('results-content');
             const emptyState = document.getElementById('results-empty');
@@ -478,6 +621,16 @@
             const doctorComment = document.getElementById('doctor-comment');
             
             trigger.addEventListener('click', async () => {
+                // ВАЛИДАЦИЯ ВОЗРАСТА
+                const ageVal = parseInt(document.getElementById('inp-age').value);
+                if (ageVal < 15 || ageVal > 50) {
+                    document.getElementById('age-error').classList.remove('hidden');
+                    alert('Возраст пациентки вне репродуктивного диапазона (15-50 лет). Расчет невозможен.');
+                    return;
+                } else {
+                    document.getElementById('age-error').classList.add('hidden');
+                }
+
                 const originalText = trigger.innerHTML;
                 trigger.innerHTML = '<span class="animate-pulse tracking-widest uppercase">CDSS Analyzing...</span>';
                 trigger.disabled = true;
@@ -494,7 +647,8 @@
                     gain: document.getElementById('inp-gain').value,
                     smoking: document.getElementById('inp-smoking').value,
                     scr_pe: document.getElementById('inp-scr-pe').value,
-                    scr_fgr: document.getElementById('inp-scr-fgr').value
+                    scr_fgr: document.getElementById('inp-scr-fgr').value,
+                    gag: document.getElementById('inp-gag').checked // Для протокола
                 };
 
                 try {
@@ -514,13 +668,16 @@
                     // === ГЕНЕРАЦИЯ ПОДРОБНОГО МЕДИЦИНСКОГО ПРОТОКОЛА ===
                     
                     const pName = document.getElementById('header-name').value;
-                    const pWeeks = document.getElementById('header-weeks').value;
+                    // Для недель берем текст из select
+                    const wSelect = document.getElementById('header-weeks');
+                    const pWeeks = wSelect.options[wSelect.selectedIndex].text;
                     const pDoctor = document.getElementById('header-doctor').value;
                     const pId = document.getElementById('header-id').value;
                     const currentDate = new Date().toLocaleDateString('ru-RU');
                     
-                    const probPE = data.pe_risk;
-                    const probFGR = data.fgr_risk;
+                    let probPE = data.pe_risk; if(probPE > 0.99) probPE = 0.99;
+                    let probFGR = data.fgr_risk; if(probFGR > 0.99) probFGR = 0.99;
+                    
                     const pePercent = (probPE * 100).toFixed(1);
                     const fgrPercent = (probFGR * 100).toFixed(1);
 
@@ -529,6 +686,7 @@
                     let comorbidities = [];
                     
                     if (inputs.hag === 'Да') comorbidities.push("Хроническая артериальная гипертензия (O10.0)");
+                    if (inputs.gag) comorbidities.push("Гестационная артериальная гипертензия (O13)"); // Добавлено ГАГ
                     if (inputs.kidney === 'Да') comorbidities.push("Болезни почек (O10.2 / N00-N29)");
                     if (parseFloat(inputs.bmi) >= 30) comorbidities.push(`Ожирение (ИМТ ${inputs.bmi}) (E66.0)`);
                     if (inputs.pe_hist === 'Да') comorbidities.push("Отягощенный акушерский анамнез: ПЭ в прошлом (O09.2)");
@@ -566,10 +724,10 @@
 
                     // ЗРП ветка
                     if (isHighRiskFGR) {
-                        plan.push(`3. МОНИТОРИНГ ЗРП (КР 2022):`);
+                        plan.push(`3. МОНИТОРИНГ ЗРП (КР 2024):`);
                         plan.push(`   - УЗ-фетометрия в динамике (интервал 14-21 день).`);
                         plan.push(`   - Допплерометрия маточно-плацентарного кровотока.`);
-                        plan.push(`   - Контроль ВДМ и окружности живота при каждой явке.`);
+                        plan.push(`   - КТГ еженедельно с 26 недель (при диагнозе ЗРП - 2 раза в нед).`);
                     } else {
                         plan.push(`3. Мониторинг плода: Плановые скрининговые УЗИ.`);
                     }
@@ -596,7 +754,6 @@ ${plan.join('\n')}
 Врач: ${pDoctor}
 _______________________ (Подпись)`;
                     
-                    // Вывод
                     cdssOutput.innerText = expertText;
                     document.getElementById('input-column').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -632,4 +789,3 @@ _______________________ (Подпись)`;
     </script>
 </body>
 </html>
-
