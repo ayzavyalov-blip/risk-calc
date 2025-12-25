@@ -8,7 +8,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* Настройка шрифтов и цветов согласно Варианту A */
-        body { font-family: 'Montserrat', sans-serif; background-color: #F9FAFB; color: #111827; display: flex; flex-direction: column; min-height: 100vh; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #F9FAFB; color: #111827; }
+        
+        /* Исправление скролла: на мобильных страница растет, на десктопе - фикс */
+        @media (min-width: 768px) {
+            body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+            .main-container { height: 100%; overflow: hidden; }
+        }
+        @media (max-width: 767px) {
+            body { height: auto; overflow-y: auto; }
+            .main-container { height: auto; overflow: visible; }
+        }
         
         /* Скроллбар */
         .overflow-y-auto::-webkit-scrollbar { width: 6px; }
@@ -46,15 +56,25 @@
             color: #9CA3AF;
             cursor: not-allowed;
         }
+        
+        /* Серые кнопки (неактивный функционал) */
+        .btn-disabled-look {
+            background-color: #E5E7EB;
+            color: #9CA3AF;
+            cursor: pointer; /* Оставляем pointer, чтобы кликнуть и увидеть алерт */
+        }
+        .btn-disabled-look:hover {
+            background-color: #D1D5DB;
+        }
 
         /* Стилизация details/summary для блока питания */
         details > summary { list-style: none; cursor: pointer; }
         details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
-<body class="p-4 md:p-8 overflow-hidden text-[13px]">
+<body class="p-4 md:p-8 text-[13px]">
 
-    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col h-full border border-gray-200 flex-1">
+    <div class="main-container max-w-7xl mx-auto bg-white rounded-2xl shadow-xl flex flex-col border border-gray-200">
         
         <div class="p-5 border-b border-gray-200 bg-white text-center flex-shrink-0">
             <h1 class="text-xl font-bold text-[#111827] uppercase tracking-wide">
@@ -96,7 +116,7 @@
                 </div>
             </div>
             <div class="flex gap-2 w-full md:w-auto">
-                <button id="import-mis" class="flex-1 md:flex-none bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-black py-2.5 px-4 rounded-lg uppercase transition flex items-center justify-center gap-2 shadow-sm">
+                <button id="import-mis" class="flex-1 md:flex-none btn-disabled-look text-[10px] font-black py-2.5 px-4 rounded-lg uppercase transition flex items-center justify-center gap-2 shadow-sm" onclick="alert('Функциональность импорта данных по пациентке из МИС в стадии разработки'); return false;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                     Импорт из МИС
                 </button>
@@ -288,7 +308,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 Сформировать протокол CDSS
                             </button>
-                            <button id="btn-export" class="flex-1 bg-white border-2 border-[#3B82F6] text-[#3B82F6] font-black text-[11px] py-4 rounded-xl uppercase hover:bg-blue-50 transition flex items-center justify-center gap-2">
+                            <button id="btn-export" class="flex-1 btn-disabled-look text-[11px] font-black py-4 rounded-xl uppercase transition flex items-center justify-center gap-2" onclick="alert('Функциональность экспорта в ЭМК МИС в стадии разработки'); return false;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                                 Экспорт в ЭМК МИС
                             </button>
@@ -401,20 +421,20 @@
                     {text: 'Экспертная УЗ-допплерометрия (МА, АП)', category: 'Инструментальная диагностика', requiredLevel: 'high'},
                     {text: 'Динамическая УЗ-фетометрия (интервал 14-21 день)', category: 'Инструментальная диагностика', requiredLevel: 'high'},
                     {text: 'КТГ с 26 недель (еженедельно; при ЗРП - 2 раза/нед)', category: 'Оценка состояния плода (FIGO 2023)', requiredLevel: 'high'},
-                    {text: 'Коррекция диеты (белковое питание ≥70г)', category: 'Профилактика и лечение', requiredLevel: 'high'},
                     {text: 'Госпитализация (при нулевом/реверсном кровотоке)', category: 'Экстренная тактика', requiredLevel: 'severe'}
                 ]
             }
         ];
 
         // Правила для блока "Персональные драйверы риска"
+        // ПРАВКА: Если ИМТ не известен (т.е. мы его не считаем), правило obesity не сработает
         const RISK_FACTORS_RULES = [
-            { id: 'obesity', label: 'Индекс массы тела (31.2 кг/м²)', or: 3.5, check: (i) => i.bmi >= 30 },
+            { id: 'obesity', label: 'Индекс массы тела (Ожирение)', or: 3.5, check: (i) => i.weightKnown && i.bmi >= 30 },
             { id: 'hag', label: 'Наличие хронической артериальной гипертензии', or: 2.8, check: (i) => i.hag == 'Да' },
             { id: 'pe_hist', label: 'Преэклампсия в анамнезе', or: 4.1, check: (i) => i.pe_hist == 'Да' },
             { id: 'age', label: 'Возрастной фактор (35+)', or: 1.5, check: (i) => i.age >= 35 },
             { id: 'fgr_hist', label: 'ЗРП в анамнезе', or: 2.2, check: (i) => i.fgr_hist == 'Да' },
-            { id: 'smoking_def', label: 'Фенотип: Курение + Дефицит веса', or: 3.8, check: (i) => i.smoking == 'Курит' && i.bmi < 18.5 },
+            { id: 'smoking_def', label: 'Фенотип: Курение + Дефицит веса', or: 3.8, check: (i) => i.weightKnown && i.smoking == 'Курит' && i.bmi < 18.5 },
             { id: 'kidney', label: 'Болезни почек', or: 2.5, check: (i) => i.kidney == 'Да' }
         ];
 
@@ -464,8 +484,12 @@
             let hasAnyHighRisk = false;
             let combinedRecsHTML = '';
             
+            // Логика белкового питания: Если риск ПЭ/ЗРП высокий ИЛИ дефицит массы
+            // Проверяем риски ниже, а ИМТ здесь
+            const isLowBmi = userInputs.weightKnown && (parseFloat(userInputs.bmi) < 18.5);
+            let needsProtein = isLowBmi; 
+
             MODELS_CONFIG.forEach(model => {
-                // Корректировка вероятности (max 0.99)
                 let prob = apiData[`${model.id}_risk`];
                 if (prob > 0.99) prob = 0.99;
                 
@@ -473,6 +497,8 @@
                 const isHigh = prob >= model.threshold;
                 const isSevere = prob >= model.thresholdSevere;
                 const severityLabel = model.id === 'pe' ? 'ПЭ' : 'ЗРП';
+                
+                if (isHigh) needsProtein = true; // Если есть высокий риск - нужно питание
 
                 const bgColor = isHigh ? 'bg-[#FEF2F2]' : 'bg-[#ECFDF5]';
                 const borderColor = isHigh ? 'border-[#EF4444]' : 'border-[#10B981]';
@@ -541,7 +567,23 @@
                 }
             });
 
-            if (hasAnyHighRisk && combinedRecsHTML) {
+            // Добавляем галочку про Питание в общий список рекомендаций, если нужно
+            if (needsProtein) {
+                 combinedRecsHTML += `
+                    <div class="bg-white p-5 border-b last:border-b-0 border-gray-100 col-span-1 md:col-span-2">
+                         <div class="flex items-center gap-2 mb-2">
+                             <span class="bg-green-50 text-green-600 text-[9px] font-black px-2 py-0.5 rounded">НУТРИЦИОЛОГИЯ</span>
+                             <h5 class="text-xs font-bold text-[#1F2937]">Диетическая коррекция</h5>
+                         </div>
+                         <label class="flex items-start p-2 hover:bg-gray-50 rounded cursor-pointer transition">
+                             <input type="checkbox" id="chk-protein-rec" checked class="mt-1 w-4 h-4 text-[#3B82F6] rounded mr-3 border-gray-300 focus:ring-blue-500">
+                             <span class="text-[11px] leading-tight text-[#374151] font-medium">Коррекция диеты (белковое питание ≥70–90 г/сут)</span>
+                         </label>
+                    </div>
+                `;
+            }
+
+            if (hasAnyHighRisk || needsProtein) {
                 recWrapper.innerHTML = `
                     <div class="p-5 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
                         <svg class="w-5 h-5 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
@@ -585,19 +627,12 @@
                     weightFields.classList.remove('opacity-50', 'pointer-events-none');
                 } else {
                     weightFields.classList.add('opacity-50', 'pointer-events-none');
-                    document.getElementById('inp-gain').value = 'Соответствует норме'; // Сброс на нейтральное
+                    document.getElementById('inp-gain').value = 'Соответствует норме'; 
                 }
             });
 
             // 3. ГАГ (Активно только >= 20 недель)
             const updateGagState = () => {
-                // Индексы в select: 0-3 (до 16 нед), 4 (17-20), 5+ (21+)
-                // То есть >= 20 нед это опции начиная с индекса 5 (21-24), 
-                // но врач просил "после 20 недель". 17-20 включает 20. 
-                // Для надежности активируем с опции "21-24" (index 5) и "17-20" (index 4) считаем пограничной?
-                // ISSHP: hypertension arising > 20 weeks.
-                // Опции: 4-6, 7-9, 10-12, 13-16, 17-20, 21-24...
-                // Будем активировать, если выбрано "21-24" или выше.
                 if (inpWeeks.selectedIndex >= 5) {
                     inpGag.disabled = false;
                     gagContainer.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -612,7 +647,7 @@
                 }
             };
             inpWeeks.addEventListener('change', updateGagState);
-            updateGagState(); // init
+            updateGagState();
 
             const trigger = document.getElementById('calc-trigger');
             const resultsContent = document.getElementById('results-content');
@@ -632,8 +667,12 @@
                 }
 
                 const originalText = trigger.innerHTML;
-                trigger.innerHTML = '<span class="animate-pulse tracking-widest uppercase">CDSS Analyzing...</span>';
+                trigger.innerHTML = '<span class="animate-pulse tracking-widest uppercase">Идет расчет...</span>';
                 trigger.disabled = true;
+
+                // Подготовка данных
+                const isWeightKnown = document.getElementById('inp-weight-known').checked;
+                const bmiVal = isWeightKnown ? document.getElementById('inp-bmi').value : "22.0"; // отправляем норму, если неизвестен, чтобы модель не сломалась
 
                 const inputs = {
                     age: document.getElementById('inp-age').value,
@@ -643,12 +682,13 @@
                     fgr_hist: document.getElementById('inp-fgr-hist').value,
                     hag: document.getElementById('inp-hag').value,
                     kidney: document.getElementById('inp-kidney').value,
-                    bmi: document.getElementById('inp-bmi').value,
+                    bmi: bmiVal, 
+                    weightKnown: isWeightKnown, // флаг для фронта
                     gain: document.getElementById('inp-gain').value,
                     smoking: document.getElementById('inp-smoking').value,
                     scr_pe: document.getElementById('inp-scr-pe').value,
                     scr_fgr: document.getElementById('inp-scr-fgr').value,
-                    gag: document.getElementById('inp-gag').checked // Для протокола
+                    gag: document.getElementById('inp-gag').checked
                 };
 
                 try {
@@ -668,7 +708,6 @@
                     // === ГЕНЕРАЦИЯ ПОДРОБНОГО МЕДИЦИНСКОГО ПРОТОКОЛА ===
                     
                     const pName = document.getElementById('header-name').value;
-                    // Для недель берем текст из select
                     const wSelect = document.getElementById('header-weeks');
                     const pWeeks = wSelect.options[wSelect.selectedIndex].text;
                     const pDoctor = document.getElementById('header-doctor').value;
@@ -686,16 +725,21 @@
                     let comorbidities = [];
                     
                     if (inputs.hag === 'Да') comorbidities.push("Хроническая артериальная гипертензия (O10.0)");
-                    if (inputs.gag) comorbidities.push("Гестационная артериальная гипертензия (O13)"); // Добавлено ГАГ
+                    if (inputs.gag) comorbidities.push("Гестационная артериальная гипертензия (O13)"); 
                     if (inputs.kidney === 'Да') comorbidities.push("Болезни почек (O10.2 / N00-N29)");
-                    if (parseFloat(inputs.bmi) >= 30) comorbidities.push(`Ожирение (ИМТ ${inputs.bmi}) (E66.0)`);
+                    
+                    if (isWeightKnown) {
+                        if (parseFloat(inputs.bmi) >= 30) comorbidities.push(`Ожирение (ИМТ ${inputs.bmi}) (E66.0)`);
+                        else if (parseFloat(inputs.bmi) < 18.5) comorbidities.push(`Дефицит массы тела (ИМТ ${inputs.bmi}) (E46)`);
+                    }
+
                     if (inputs.pe_hist === 'Да') comorbidities.push("Отягощенный акушерский анамнез: ПЭ в прошлом (O09.2)");
                     if (inputs.fgr_hist === 'Да') comorbidities.push("Отягощенный акушерский анамнез: ЗРП в прошлом (O09.5)");
                     if (inputs.smoking === 'Курит') comorbidities.push("Табакокурение (F17.2)");
 
                     const comorbText = comorbidities.length > 0 ? `\nСопутствующие: ${comorbidities.join(', ')}.` : "";
 
-                    // 2. Оценка риска и драйверы
+                    // 2. Оценка риска
                     const isHighRiskPE = probPE > 0.57;
                     const isHighRiskFGR = probFGR > 0.39;
                     
@@ -704,14 +748,13 @@
                     else if (isHighRiskPE) riskConclusion = "ВЫСОКИЙ РИСК ПРЕЭКЛАМПСИИ.";
                     else if (isHighRiskFGR) riskConclusion = "ВЫСОКИЙ РИСК ЗАДЕРЖКИ РОСТА ПЛОДА.";
                     else riskConclusion = "Низкий риск больших акушерских синдромов.";
-
-                    // 3. План ведения (Сборка на основе КР)
-                    let plan = [];
                     
-                    // Общее
+                    const bmiText = isWeightKnown ? inputs.bmi : "Неизвестен";
+
+                    // 3. План ведения
+                    let plan = [];
                     plan.push(`1. Диспансерное наблюдение: ${isHighRiskPE || isHighRiskFGR ? 'Индивидуальный график (явка каждые 2 недели)' : 'Согласно приказу 1130н'}.`);
                     
-                    // ПЭ ветка
                     if (isHighRiskPE) {
                         plan.push(`2. ПРОФИЛАКТИКА ПЭ (КР 2021):`);
                         plan.push(`   - Ацетилсалициловая кислота 150 мг на ночь (до 36 нед).`);
@@ -722,7 +765,6 @@
                          plan.push(`2. Профилактика ПЭ: Специфическая медикаментозная терапия не показана.`);
                     }
 
-                    // ЗРП ветка
                     if (isHighRiskFGR) {
                         plan.push(`3. МОНИТОРИНГ ЗРП (КР 2024):`);
                         plan.push(`   - УЗ-фетометрия в динамике (интервал 14-21 день).`);
@@ -732,11 +774,18 @@
                         plan.push(`3. Мониторинг плода: Плановые скрининговые УЗИ.`);
                     }
 
+                    // Проверка на белковое питание в протоколе
+                    const proteinCheckbox = document.getElementById('chk-protein-rec');
+                    if (proteinCheckbox && proteinCheckbox.checked) {
+                        plan.push(`4. НУТРИЦИОЛОГИЯ:`);
+                        plan.push(`   - Коррекция диеты: белковая нагрузка ≥70–90 г/сут (мясо, рыба, молочные продукты, бобовые).`);
+                    }
+
                     // Формирование итогового текста
                     const expertText = `ПРОТОКОЛ ОЦЕНКИ ИНДИВИДУАЛЬНОГО РИСКА (CDSS)
 Дата расчета: ${currentDate}
 ФИО: ${pName} (ID: ${pId})
-Возраст: ${inputs.age} лет.
+Возраст: ${inputs.age} лет. ИМТ: ${bmiText}.
 
 I. КЛИНИЧЕСКИЙ ДИАГНОЗ (ПРЕДВАРИТЕЛЬНЫЙ):
 ${diagnosisText}${comorbText}
@@ -755,6 +804,8 @@ ${plan.join('\n')}
 _______________________ (Подпись)`;
                     
                     cdssOutput.innerText = expertText;
+                    
+                    // Скролл к верху внутренней части или контейнера
                     document.getElementById('input-column').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 } catch (e) {
@@ -776,14 +827,15 @@ _______________________ (Подпись)`;
             btnTactical.addEventListener('click', () => { btnTactical.classList.add('active-mode'); btnScreening.classList.remove('active-mode'); });
 
             document.getElementById('import-mis').addEventListener('click', function() {
-                this.innerHTML = 'ЗАГРУЗКА...';
+                // Если кнопка заблокирована логикой, обработчик в HTML (onclick) сработает раньше.
+                // Но если нужно визуальное действие:
+                /* this.innerHTML = 'ЗАГРУЗКА...';
                 document.getElementById('input-column').classList.add('loading-mis');
                 setTimeout(() => {
                     document.getElementById('input-column').classList.remove('loading-mis');
                     this.innerHTML = 'ДАННЫЕ ЗАГРУЖЕНЫ';
-                    document.getElementById('inp-scr-pe').value = '1:125';
-                    document.getElementById('inp-scr-fgr').value = '1:60';
                 }, 1000);
+                */
             });
         });
     </script>
