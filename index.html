@@ -66,10 +66,6 @@
         .btn-disabled-look:hover {
             background-color: #D1D5DB;
         }
-
-        /* Стилизация details/summary для блока питания */
-        details > summary { list-style: none; cursor: pointer; }
-        details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
 <body class="p-4 md:p-8 text-[13px]">
@@ -243,41 +239,6 @@
                     <p class="text-[10px] text-gray-400 text-center italic mt-[-10px]">
                         * Клинически вероятность наступления события не может быть абсолютной (100%). Значение скорректировано (BMJ, 2023).
                     </p>
-
-                    <details class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden group">
-                        <summary class="p-4 flex items-center justify-between bg-blue-50/50 hover:bg-blue-50 transition">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-blue-100 p-1.5 rounded-lg text-blue-600">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                </div>
-                                <span class="text-sm font-bold text-gray-800">Рекомендации по белковому питанию</span>
-                            </div>
-                            <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </summary>
-                        <div class="p-5 text-xs text-gray-600 leading-relaxed border-t border-blue-100">
-                            <p class="mb-3 font-medium">Адекватное белковое питание (>1,2 г/кг/сут) ассоциировано со снижением риска преэклампсии и улучшением фетоплацентарного кровотока (Nutrients, 2023; Cochrane, 2024). Рекомендуется ≥70–90 г/сут.</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-gray-50 p-3 rounded-lg">
-                                    <h6 class="font-bold text-gray-700 mb-2">🍗 Животные источники</h6>
-                                    <ul class="space-y-1 list-disc list-inside">
-                                        <li>Курица/индейка (100–150 г)</li>
-                                        <li>Рыба (100 г)</li>
-                                        <li>Творог 5–9% (150 г)</li>
-                                        <li>Кефир/молоко (200 мл)</li>
-                                    </ul>
-                                </div>
-                                <div class="bg-gray-50 p-3 rounded-lg">
-                                    <h6 class="font-bold text-gray-700 mb-2">🌱 Растительные источники</h6>
-                                    <ul class="space-y-1 list-disc list-inside">
-                                        <li>Чечевица (½ стакана)</li>
-                                        <li>Гречка (50 г сухой)</li>
-                                        <li>Тофу (100 г)</li>
-                                        <li>Миндаль/орехи (20 г)</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </details>
 
                     <div id="recommendations-wrapper" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden fade-in"></div>
 
