@@ -267,7 +267,7 @@
                         <div class="flex flex-col sm:flex-row gap-2 pt-2">
                             <button id="btn-protocol" class="flex-1 bg-[#3B82F6] text-white font-black text-[11px] py-4 rounded-xl uppercase hover:bg-[#2563EB] transition shadow-lg flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                Выгрузить протокол CDSS
+                                Выгрузить протокол CDSS (TXT)
                             </button>
                             <button id="btn-export" class="flex-1 btn-disabled-look text-[11px] font-black py-4 rounded-xl uppercase transition flex items-center justify-center gap-2" onclick="alert('Функциональность экспорта в ЭМК МИС в стадии разработки'); return false;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -743,6 +743,10 @@
                     }
 
                     // Формирование итогового текста
+                    // Добавляем комментарий врача, если он есть
+                    const doctorNote = document.getElementById('doctor-comment').value.trim();
+                    const doctorNoteText = doctorNote ? `\n\nIV. ОСОБЫЕ ОТМЕТКИ ВРАЧА:\n${doctorNote}` : '';
+
                     const expertText = `ПРОТОКОЛ ОЦЕНКИ ИНДИВИДУАЛЬНОГО РИСКА (CDSS)
 Дата расчета: ${currentDate}
 ФИО: ${pName} (ID: ${pId})
@@ -759,7 +763,7 @@ II. ПРОГНОЗ РАЗВИТИЯ ОСЛОЖНЕНИЙ (AI-АНАЛИЗ):
 Данные I скрининга: риск ПЭ ${inputs.scr_pe}, риск ЗРП ${inputs.scr_fgr}.
 
 III. РЕКОМЕНДОВАННЫЙ ПЛАН ВЕДЕНИЯ (Согласно КР МЗ РФ):
-${plan.join('\n')}
+${plan.join('\n')}${doctorNoteText}
 
 Врач: ${pDoctor}
 _______________________ (Подпись)`;
@@ -775,6 +779,34 @@ _______________________ (Подпись)`;
                     trigger.innerHTML = originalText;
                     trigger.disabled = false;
                 }
+            });
+
+            // Обработчик для кнопки "Выгрузить протокол"
+            document.getElementById('btn-protocol').addEventListener('click', () => {
+                const textContent = document.getElementById('cdss-generated-text').innerText;
+                
+                if (!textContent) {
+                    alert('Сначала необходимо рассчитать риски для генерации протокола.');
+                    return;
+                }
+
+                // Получаем данные для имени файла
+                const pName = document.getElementById('header-name').value || 'Пациент';
+                const dateStr = new Date().toLocaleDateString('ru-RU').replace(/\./g, '-');
+                
+                // Формируем имя файла
+                const filename = `${pName}_${dateStr}.txt`;
+                
+                // Создаем и скачиваем файл
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
             });
 
             document.getElementById('copy-to-comment').addEventListener('click', () => {
@@ -802,4 +834,3 @@ _______________________ (Подпись)`;
     </script>
 </body>
 </html>
-
