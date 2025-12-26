@@ -229,7 +229,7 @@
                     </div>
                 </div>
 
-                <div id="results-content" class="hidden h-full flex flex-col gap-6">
+                <div id="results-content" class="hidden h-auto flex flex-col gap-2">
                     </div>
 
                 <div id="protocol-container" class="hidden mt-6 space-y-5">
@@ -354,7 +354,7 @@
                     <li><strong>OR = 1:</strong> Фактор не влияет на исход.</li>
                 </ul>
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
-                    [cite_start]<p class="font-bold mb-2 text-[#111827]">Примеры из исследования[cite: 236]:</p>
+                    <p class="font-bold mb-2 text-[#111827]">Примеры из исследования:</p>
                     <ul class="list-disc pl-5 space-y-1 text-[#4B5563]">
                         <li><strong>Гестационная АГ:</strong> aOR 6.6 (95% ДИ 2.0-20.0) — мощный предиктор ЗРП.</li>
                         <li><strong>Хроническая АГ:</strong> aOR 5.3 (95% ДИ 1.04-25.0).</li>
@@ -404,10 +404,10 @@
             {
                 id: 'npf',
                 title: 'ЗРП-НМП (Нутритивно-метаболический фенотип)',
-                crRef: 'Клинические рекомендации Недостаточный рост плода... (2022) и Клинические рекомендации Нормальная беременность (2024).',
+                crRef: 'Клинические рекомендации Нормальная беременность. (Утв. Минздравом России 15.02.2024, ID 288).',
                 threshold: 0.16,
                 thresholdSevere: 0.50,
-                baseRef: 'Фенотип с маркерами плацентарной недостаточности и нутритивного дефицита.',
+                baseRef: 'Раздел "Ведение беременности", оценка нутритивного статуса и профилактика дефицитов.',
                 checkList: [
                     {text: 'Расширенная оценка нутритивного статуса (биохимия крови, ферритин)', category: 'Диагностика', requiredLevel: 'high'},
                     {text: 'Коррекция диеты (белковое питание ≥90 г/сут)', category: 'Лечение', requiredLevel: 'high'},
@@ -456,7 +456,7 @@
             }
             
             return `
-                <div class="${heightClass} bg-[#1F2937] text-white p-4 rounded-2xl shadow-md border border-gray-700 flex flex-col fade-in">
+                <div class="bg-[#1F2937] text-white p-4 rounded-2xl shadow-md border border-gray-700 flex flex-col fade-in">
                     <div class="flex justify-between items-center mb-2 flex-shrink-0">
                         <h3 class="text-xs font-bold flex items-center uppercase tracking-tight text-white">
                             Ведущие факторы риска
@@ -470,38 +470,48 @@
             `;
         }
 
-        function renderCompactCard(model, prob, isHigh, isSevere, heightClass) {
+        function renderCompactCard(model, prob, isHigh, isSevere) {
             const percent = (prob * 100).toFixed(1) + '%';
-            const severityLabel = model.id === 'pe' ? 'ПЭ' : 'ЗРП';
-
+            
             const bgColor = isHigh ? 'bg-[#FEF2F2]' : 'bg-[#ECFDF5]';
             const borderColor = isHigh ? 'border-[#EF4444]' : 'border-[#10B981]';
             const textColor = isHigh ? 'text-[#EF4444]' : 'text-[#10B981]';
             const badgeText = isHigh ? 'ВЫСОКИЙ РИСК' : 'НИЗКИЙ РИСК';
             const icon = isHigh ? '⚠️' : '🛡️';
 
+            let justificationHTML = '';
+            if (isHigh) {
+                justificationHTML = `
+                    <div class="mt-2 mb-1 w-full">
+                        <span class="font-bold text-[10px] text-slate-700 block mb-0.5">Обоснование:</span>
+                        <p class="text-[10px] text-[#6B7280] leading-tight text-justify">
+                            <span class="font-semibold block mb-0.5">${model.crRef}</span>
+                            ${model.baseRef}
+                        </p>
+                    </div>
+                `;
+            }
+
             return `
-                <div class="${heightClass} ${bgColor} border-l-4 ${borderColor} p-2 rounded-2xl shadow-md flex flex-col justify-between fade-in">
-                    <div class="flex justify-between items-start">
+                <div class="${bgColor} border-l-4 ${borderColor} p-4 rounded-2xl shadow-md flex flex-col fade-in w-full h-auto">
+                    <div class="flex justify-between items-start mb-1">
                         <h4 class="font-bold text-[#111827] uppercase text-sm tracking-wider leading-tight w-2/3">${model.title}</h4>
                         <div class="flex flex-col items-end gap-0.5">
-                            <span class="font-bold text-[9px] uppercase flex items-center gap-1 ${textColor}">
+                            <span class="font-bold text-[11px] uppercase flex items-center gap-1 ${textColor}">
                                 ${icon} ${badgeText}
                             </span>
-                            ${isSevere ? `<span class="bg-[#EF4444] text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase animate-pulse">Тяжелая</span>` : ''}
+                            ${isSevere ? `<span class="bg-[#EF4444] text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase animate-pulse">Тяжелая</span>` : ''}
                         </div>
                     </div>
                     
-                    <div class="text-3xl font-black ${textColor} leading-none tracking-tight mt-1 mb-1">
+                    <div class="text-3xl font-black ${textColor} leading-none tracking-tight">
                         ${percent}
                     </div>
                     
-                    <div class="flex justify-between items-end mt-1">
-                        <div class="text-[9px] text-[#6B7280] leading-tight w-3/4 pr-2">
-                            <span class="font-bold block mb-0.5">${model.crRef}</span>
-                            ${model.baseRef}
-                        </div>
-                        <button onclick="openModal('modal-${model.id}-info')" class="text-[9px] font-bold text-[#3B82F6] hover:underline whitespace-nowrap">Инфо →</button>
+                    ${justificationHTML}
+                    
+                    <div class="flex justify-end mt-2">
+                        <button onclick="openModal('modal-${model.id}-info')" class="text-[11px] font-bold text-[#3B82F6] hover:underline whitespace-nowrap">Инфо →</button>
                     </div>
                 </div>
             `;
@@ -579,8 +589,8 @@
                     `;
                 }
 
-                // Добавляем карточку в стек (min-h-[120px] для компактности)
-                stackHTML += renderCompactCard(model, prob, isHigh, isSevere, "min-h-[120px]");
+                // Добавляем карточку в стек
+                stackHTML += renderCompactCard(model, prob, isHigh, isSevere);
             });
 
             stackHTML += '</div>'; // Закрываем стек
