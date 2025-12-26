@@ -21,8 +21,8 @@
         }
         
         /* Скроллбар */
-        .overflow-y-auto::-webkit-scrollbar { width: 6px; }
-        .overflow-y-auto::-webkit-scrollbar-track { background: #f1f5f9; }
+        .overflow-y-auto::-webkit-scrollbar { width: 4px; }
+        .overflow-y-auto::-webkit-scrollbar-track { background: transparent; }
         .overflow-y-auto::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         /* Активный режим кнопок (Синий акцент) */
@@ -229,18 +229,11 @@
                     </div>
                 </div>
 
-                <div id="results-container" class="hidden space-y-6">
-                    <div id="results-content"></div>
-                    
-                    <div id="risk-factors-block"></div>
+                <div id="results-content" class="hidden h-full flex flex-col gap-6">
+                    </div>
 
-                    <div id="cards-wrapper" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
-                    
-                    <p class="text-[10px] text-gray-400 text-center italic mt-[-10px]">
-                        * Клинически вероятность наступления события не может быть абсолютной (100%). Значение скорректировано (BMJ, 2023).
-                    </p>
-
-                    <div id="recommendations-wrapper" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden fade-in"></div>
+                <div id="protocol-container" class="hidden mt-6 space-y-5">
+                     <div id="recommendations-wrapper" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden fade-in"></div>
 
                     <div class="bg-[#DBEAFE] text-[#111827] p-6 rounded-2xl shadow-md border border-blue-200 space-y-4 fade-in">
                         <div class="flex items-center justify-between border-b border-blue-300 pb-3">
@@ -416,94 +409,116 @@
         function closeModal(id) { document.getElementById(id).style.display = "none"; }
         window.onclick = function(event) { if (event.target.className === 'modal') { event.target.style.display = "none"; } }
 
-        function renderRiskFactorsBlock(inputs) {
+        function renderRiskFactorsBlock(inputs, heightClass) {
             const activeFactors = RISK_FACTORS_RULES.filter(rule => rule.check(inputs));
-            if (activeFactors.length === 0) return ''; 
-            activeFactors.sort((a, b) => b.or - a.or);
-            const barsHTML = activeFactors.map(f => {
-                const width = Math.min((f.or / 5) * 100, 100); 
-                return `
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[11px] mb-1">
-                            <span>${f.label}</span>
-                            <span class="text-white font-bold opacity-90">OR: ${f.or}</span>
+            
+            // Если факторов нет, выводим сообщение
+            let contentHTML = '';
+            if (activeFactors.length === 0) {
+                contentHTML = '<p class="text-sm text-gray-300 italic">Специфических факторов высокого риска не выявлено</p>';
+            } else {
+                activeFactors.sort((a, b) => b.or - a.or);
+                contentHTML = activeFactors.map(f => {
+                    const width = Math.min((f.or / 5) * 100, 100); 
+                    return `
+                        <div class="space-y-1 mb-2 last:mb-0">
+                            <div class="flex justify-between text-[11px] mb-0.5">
+                                <span>${f.label}</span>
+                                <span class="text-white font-bold opacity-90">OR: ${f.or}</span>
+                            </div>
+                            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-[#EF4444] border-r border-white/20" style="width: ${width}%"></div>
+                            </div>
                         </div>
-                        <div class="h-2.5 bg-gray-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-[#EF4444] border-r border-white/20" style="width: ${width}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            }
             
             return `
-                <div class="bg-[#1F2937] text-white p-6 rounded-2xl shadow-xl border border-gray-700 fade-in">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-base font-bold flex items-center uppercase tracking-tight text-white">
-                            Ведущие факторы риска (Отношение шансов)
+                <div class="${heightClass} bg-[#1F2937] text-white p-4 rounded-2xl shadow-md border border-gray-700 flex flex-col fade-in">
+                    <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                        <h3 class="text-xs font-bold flex items-center uppercase tracking-tight text-white">
+                            Ведущие факторы риска
                         </h3>
+                        <span class="text-[9px] bg-gray-700 px-2 py-0.5 rounded text-gray-300">Отношение шансов</span>
                     </div>
-                    <div class="space-y-4 text-white">${barsHTML}</div>
+                    <div class="flex-1 overflow-y-auto pr-1">
+                        ${contentHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCompactCard(model, prob, isHigh, isSevere, heightClass) {
+            const percent = (prob * 100).toFixed(1) + '%';
+            const severityLabel = model.id === 'pe' ? 'ПЭ' : 'ЗРП';
+
+            const bgColor = isHigh ? 'bg-[#FEF2F2]' : 'bg-[#ECFDF5]';
+            const borderColor = isHigh ? 'border-[#EF4444]' : 'border-[#10B981]';
+            const textColor = isHigh ? 'text-[#EF4444]' : 'text-[#10B981]';
+            const badgeText = isHigh ? 'ВЫСОКИЙ' : 'НИЗКИЙ';
+            const icon = isHigh ? '⚠️' : '🛡️';
+
+            return `
+                <div class="${heightClass} ${bgColor} border-l-4 ${borderColor} p-3 rounded-2xl shadow-md flex flex-col justify-between fade-in">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-bold text-[#111827] uppercase text-[10px] tracking-wider leading-tight w-2/3">${model.title}</h4>
+                        <div class="flex flex-col items-end gap-0.5">
+                            <span class="font-bold text-[9px] uppercase flex items-center gap-1 ${textColor}">
+                                ${icon} ${badgeText}
+                            </span>
+                            ${isSevere ? `<span class="bg-[#EF4444] text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase animate-pulse">Тяжелая</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="text-3xl font-black ${textColor} leading-none tracking-tight">
+                        ${percent}
+                    </div>
+                    
+                    <div class="flex justify-between items-end mt-1">
+                        <p class="text-[9px] text-[#6B7280] leading-tight w-3/4 truncate pr-2">
+                            ${model.baseRef}
+                        </p>
+                        <button onclick="openModal('modal-${model.id}-info')" class="text-[9px] font-bold text-[#3B82F6] hover:underline whitespace-nowrap">Инфо →</button>
+                    </div>
                 </div>
             `;
         }
 
         function renderResults(apiData, userInputs) {
-            const container = document.getElementById('cards-wrapper');
-            const factorsContainer = document.getElementById('risk-factors-block');
+            const resultsContent = document.getElementById('results-content');
             const recWrapper = document.getElementById('recommendations-wrapper');
+            const protocolContainer = document.getElementById('protocol-container');
             
-            container.innerHTML = '';
-            factorsContainer.innerHTML = renderRiskFactorsBlock(userInputs);
+            // Очистка и показ
+            resultsContent.innerHTML = '';
+            resultsContent.classList.remove('hidden');
+            protocolContainer.classList.remove('hidden');
 
             let hasAnyHighRisk = false;
             let combinedRecsHTML = '';
-            
-            // Логика белкового питания: Если риск ПЭ/ЗРП высокий ИЛИ дефицит массы
-            // Проверяем риски ниже, а ИМТ здесь
-            const isLowBmi = userInputs.weightKnown && (parseFloat(userInputs.bmi) < 18.5);
-            let needsProtein = isLowBmi; 
+            let isLowBmi = userInputs.weightKnown && (parseFloat(userInputs.bmi) < 18.5);
+            let needsProtein = isLowBmi;
 
+            // 1. Формируем стек HTML (Факторы + 3 карточки)
+            let stackHTML = '<div class="flex flex-col h-[800px] w-full gap-2 mb-2">';
+            
+            // Блок 1: Факторы риска (40%)
+            stackHTML += renderRiskFactorsBlock(userInputs, "h-[40%]");
+
+            // Блоки 2-4: Модели (20% каждая)
             MODELS_CONFIG.forEach(model => {
-                // Если API не вернул данные для этой модели (например, npf), ставим 0 или обрабатываем ошибку
                 let prob = apiData[`${model.id}_risk`] !== undefined ? apiData[`${model.id}_risk`] : 0;
-                
                 if (prob > 0.99) prob = 0.99;
                 
-                const percent = (prob * 100).toFixed(1) + '%';
                 const isHigh = prob >= model.threshold;
                 const isSevere = prob >= model.thresholdSevere;
-                const severityLabel = model.id === 'pe' ? 'ПЭ' : 'ЗРП';
                 
-                if (isHigh) needsProtein = true; // Если есть высокий риск - нужно питание
-
-                const bgColor = isHigh ? 'bg-[#FEF2F2]' : 'bg-[#ECFDF5]';
-                const borderColor = isHigh ? 'border-[#EF4444]' : 'border-[#10B981]';
-                const textColor = isHigh ? 'text-[#EF4444]' : 'text-[#10B981]';
-                const badgeText = isHigh ? 'ВЫСОКИЙ РИСК' : 'НИЗКИЙ РИСК';
-                const icon = isHigh ? '⚠️' : '🛡️';
-
-                const cardHtml = `
-                    <div class="${bgColor} border-2 ${borderColor} p-6 rounded-xl shadow-sm hover:shadow-md transition flex flex-col fade-in">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-[#111827] uppercase text-xs tracking-wider">${model.title}</h4>
-                            <div class="flex flex-col items-end gap-1 text-right">
-                                <span class="font-bold text-[10px] uppercase flex items-center gap-1 ${textColor}">
-                                    ${icon} ${badgeText}
-                                </span>
-                                ${isSevere ? `<span class="bg-[#EF4444] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase animate-pulse">Риск тяжелой ${severityLabel}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="text-[36px] font-bold ${textColor} mb-2 leading-none">${percent}</div>
-                        <div class="p-3 bg-white/60 border border-gray-200/50 rounded-lg text-[10px] text-[#4B5563] mb-4 leading-tight flex-1">
-                            <strong>Обоснование:</strong> ${model.baseRef}
-                        </div>
-                        <button onclick="openModal('modal-cdss-info')" class="text-[10px] font-bold text-[#3B82F6] uppercase hover:underline text-left">Подробнее о модели →</button>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', cardHtml);
-
                 if (isHigh) {
                     hasAnyHighRisk = true;
+                    needsProtein = true; // Высокий риск -> нужно питание
+                    
+                    // Сбор рекомендаций для нижнего блока
                     const grouped = {};
                     model.checkList.forEach(item => {
                         if (!grouped[item.category]) grouped[item.category] = [];
@@ -541,9 +556,17 @@
                         </div>
                     `;
                 }
+
+                // Добавляем карточку в стек (20%)
+                stackHTML += renderCompactCard(model, prob, isHigh, isSevere, "h-[20%]");
             });
 
-            // Добавляем галочку про Питание в общий список рекомендаций, если нужно
+            stackHTML += '</div>'; // Закрываем стек
+            
+            // Вставляем стек в DOM
+            resultsContent.innerHTML = stackHTML;
+
+            // Обработка блока рекомендаций (внизу)
             if (needsProtein) {
                  combinedRecsHTML += `
                     <div class="bg-white p-5 border-b last:border-b-0 border-gray-100 col-span-1 md:col-span-2">
@@ -586,7 +609,7 @@
             const gagLabel = document.getElementById('gag-label');
             const gagContainer = document.getElementById('gag-container');
 
-            // 1. Интервал (Прочерк при первых родах)
+            // 1. Интервал
             inpParity.addEventListener('input', () => {
                 if (parseInt(inpParity.value) === 0) {
                     inpInterval.value = 'none';
@@ -597,7 +620,7 @@
                 }
             });
 
-            // 2. Вес (Скрытие полей)
+            // 2. Вес
             inpWeightKnown.addEventListener('change', () => {
                 if (inpWeightKnown.checked) {
                     weightFields.classList.remove('opacity-50', 'pointer-events-none');
@@ -607,7 +630,7 @@
                 }
             });
 
-            // 3. ГАГ (Активно только >= 20 недель)
+            // 3. ГАГ
             const updateGagState = () => {
                 if (inpWeeks.selectedIndex >= 5) {
                     inpGag.disabled = false;
@@ -626,7 +649,6 @@
             updateGagState();
 
             const trigger = document.getElementById('calc-trigger');
-            const resultsContent = document.getElementById('results-content');
             const emptyState = document.getElementById('results-empty');
             const cdssOutput = document.getElementById('cdss-generated-text');
             const doctorComment = document.getElementById('doctor-comment');
@@ -646,9 +668,8 @@
                 trigger.innerHTML = '<span class="animate-pulse tracking-widest uppercase">Идет расчет...</span>';
                 trigger.disabled = true;
 
-                // Подготовка данных
                 const isWeightKnown = document.getElementById('inp-weight-known').checked;
-                const bmiVal = isWeightKnown ? document.getElementById('inp-bmi').value : "22.0"; // отправляем норму, если неизвестен, чтобы модель не сломалась
+                const bmiVal = isWeightKnown ? document.getElementById('inp-bmi').value : "22.0"; 
 
                 const inputs = {
                     age: document.getElementById('inp-age').value,
@@ -659,7 +680,7 @@
                     hag: document.getElementById('inp-hag').value,
                     kidney: document.getElementById('inp-kidney').value,
                     bmi: bmiVal, 
-                    weightKnown: isWeightKnown, // флаг для фронта
+                    weightKnown: isWeightKnown,
                     gain: document.getElementById('inp-gain').value,
                     smoking: document.getElementById('inp-smoking').value,
                     scr_pe: document.getElementById('inp-scr-pe').value,
@@ -678,11 +699,9 @@
                     const data = await response.json();
 
                     emptyState.classList.add('hidden');
-                    document.getElementById('results-container').classList.remove('hidden');
                     renderResults(data, inputs);
 
-                    // === ГЕНЕРАЦИЯ ПОДРОБНОГО МЕДИЦИНСКОГО ПРОТОКОЛА ===
-                    
+                    // === ГЕНЕРАЦИЯ ПРОТОКОЛА ===
                     const pName = document.getElementById('header-name').value;
                     const wSelect = document.getElementById('header-weeks');
                     const pWeeks = wSelect.options[wSelect.selectedIndex].text;
@@ -698,7 +717,7 @@
                     const fgrPercent = (probFGR * 100).toFixed(1);
                     const npfPercent = (probNPF * 100).toFixed(1);
 
-                    // 1. Формирование диагноза и сопутствующих заболеваний (МКБ-10)
+                    // 1. Диагноз
                     let diagnosisText = `Беременность ${pWeeks}.`;
                     let comorbidities = [];
                     
@@ -717,7 +736,7 @@
 
                     const comorbText = comorbidities.length > 0 ? `\nСопутствующие: ${comorbidities.join(', ')}.` : "";
 
-                    // 2. Оценка риска
+                    // 2. Риски
                     const isHighRiskPE = probPE > 0.57;
                     const isHighRiskFGR = probFGR > 0.39;
                     const isHighRiskNPF = probNPF > 0.16;
@@ -728,10 +747,9 @@
                     if (isHighRiskNPF) riskConclusion.push("ВЫСОКИЙ РИСК ЗРП-НМП");
                     
                     let riskString = riskConclusion.length > 0 ? riskConclusion.join(", ") : "Низкий риск больших акушерских синдромов.";
-                    
                     const bmiText = isWeightKnown ? inputs.bmi : "Неизвестен";
 
-                    // 3. План ведения
+                    // 3. План
                     let plan = [];
                     plan.push(`1. Диспансерное наблюдение: ${riskConclusion.length > 0 ? 'Индивидуальный график (явка каждые 2 недели)' : 'Согласно приказу 1130н'}.`);
                     
@@ -754,15 +772,12 @@
                         plan.push(`3. Мониторинг плода: Плановые скрининговые УЗИ.`);
                     }
 
-                    // Проверка на белковое питание в протоколе
                     const proteinCheckbox = document.getElementById('chk-protein-rec');
                     if (proteinCheckbox && proteinCheckbox.checked) {
                         plan.push(`4. НУТРИЦИОЛОГИЯ:`);
                         plan.push(`   - Коррекция диеты: белковая нагрузка ≥70–90 г/сут (мясо, рыба, молочные продукты, бобовые).`);
                     }
 
-                    // Формирование итогового текста
-                    // Добавляем комментарий врача, если он есть
                     const doctorNote = document.getElementById('doctor-comment').value.trim();
                     const doctorNoteText = doctorNote ? `\n\nIV. ОСОБЫЕ ОТМЕТКИ ВРАЧА:\n${doctorNote}` : '';
 
@@ -789,8 +804,6 @@ ${plan.join('\n')}${doctorNoteText}
 _______________________ (Подпись)`;
                     
                     cdssOutput.innerText = expertText;
-                    
-                    // Скролл к верху внутренней части или контейнера
                     document.getElementById('input-column').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 } catch (e) {
@@ -801,23 +814,15 @@ _______________________ (Подпись)`;
                 }
             });
 
-            // Обработчик для кнопки "Выгрузить протокол"
             document.getElementById('btn-protocol').addEventListener('click', () => {
                 const textContent = document.getElementById('cdss-generated-text').innerText;
-                
                 if (!textContent) {
                     alert('Сначала необходимо рассчитать риски для генерации протокола.');
                     return;
                 }
-
-                // Получаем данные для имени файла
                 const pName = document.getElementById('header-name').value || 'Пациент';
                 const dateStr = new Date().toLocaleDateString('ru-RU').replace(/\./g, '-');
-                
-                // Формируем имя файла
                 const filename = `${pName}_${dateStr}.txt`;
-                
-                // Создаем и скачиваем файл
                 const blob = new Blob([textContent], { type: 'text/plain' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -840,15 +845,6 @@ _______________________ (Подпись)`;
             btnTactical.addEventListener('click', () => { btnTactical.classList.add('active-mode'); btnScreening.classList.remove('active-mode'); });
 
             document.getElementById('import-mis').addEventListener('click', function() {
-                // Если кнопка заблокирована логикой, обработчик в HTML (onclick) сработает раньше.
-                // Но если нужно визуальное действие:
-                /* this.innerHTML = 'ЗАГРУЗКА...';
-                document.getElementById('input-column').classList.add('loading-mis');
-                setTimeout(() => {
-                    document.getElementById('input-column').classList.remove('loading-mis');
-                    this.innerHTML = 'ДАННЫЕ ЗАГРУЖЕНЫ';
-                }, 1000);
-                */
             });
         });
     </script>
