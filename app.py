@@ -105,40 +105,38 @@ def prepare_features(data):
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if block_pe is None:
-        return jsonify({'error': 'Models not loaded correctly on server start'}), 500
-
     try:
         data = request.json
-        # Превращаем JSON в DataFrame
-        df_full = prepare_features(data)
-        
-        # --- РАСЧЕТ ПЭ ---
+        df_full = prepare_features_from_html(data)
+
+        # 1. Расчет риска ПЭ
         features_pe = block_pe["features_sel"]
-        # Берем только нужные колонки, игнорируя лишние
         X_pe = df_full[features_pe].copy()
-        
-        # Трансформация и прогноз
         X_pe_imp = block_pe["preprocessor"].transform(X_pe)
         p_pe_raw = block_pe["rf_model"].predict_proba(X_pe_imp)[:, 1]
         p_pe_cal = block_pe["iso_calibrator"].transform(p_pe_raw)[0]
-        
-        # --- РАСЧЕТ ЗРП ---
+
+        # 2. Расчет риска ЗРП
         features_fgr = block_fgr["features_sel"]
         X_fgr = df_full[features_fgr].copy()
-        
         X_fgr_imp = block_fgr["preprocessor"].transform(X_fgr)
         p_fgr_raw = block_fgr["rf_model"].predict_proba(X_fgr_imp)[:, 1]
         p_fgr_cal = block_fgr["iso_calibrator"].transform(p_fgr_raw)[0]
 
-        # Возвращаем JSON
+        # 3. ДОБАВЛЕНО: Расчет риска ЗРП-НМП (НПФ)
+        features_npf = block_npf["features_sel"]
+        X_npf = df_full[features_npf].copy()
+        X_npf_imp = block_npf["preprocessor"].transform(X_npf)
+        p_npf_raw = block_npf["rf_model"].predict_proba(X_npf_imp)[:, 1]
+        p_npf_cal = block_npf["iso_calibrator"].transform(p_npf_raw)[0]
+
         return jsonify({
             'pe_risk': float(p_pe_cal),
-            'fgr_risk': float(p_fgr_cal)
+            'fgr_risk': float(p_fgr_cal),
+            'npf_risk': float(p_npf_cal)  # <-- Добавлено поле для 3-й плашки
         })
 
     except Exception as e:
-        print(f"Error during prediction: {e}")
         return jsonify({'error': str(e)}), 500
 
 # Health Check (Яндекс пингует этот адрес, чтобы понять, жив ли контейнер)
@@ -150,4 +148,5 @@ def health():
 if __name__ == '__main__':
     # Получаем порт из окружения (Яндекс сам его задаст)
     port = int(os.environ.get('PORT', 8080))
+
     app.run(host='0.0.0.0', port=port)
