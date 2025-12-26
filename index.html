@@ -384,6 +384,19 @@
                     {text: 'КТГ с 26 недель (еженедельно; при ЗРП - 2 раза/нед)', category: 'Оценка состояния плода (FIGO 2023)', requiredLevel: 'high'},
                     {text: 'Госпитализация (при нулевом/реверсном кровотоке)', category: 'Экстренная тактика', requiredLevel: 'severe'}
                 ]
+            },
+            {
+                id: 'npf',
+                title: 'ЗРП-НМП (Нутритивно-метаболический фенотип)',
+                crRef: 'КР МЗ РФ «Недостаточный рост плода...» (2024)',
+                threshold: 0.16,
+                thresholdSevere: 0.50,
+                baseRef: 'Фенотип с маркерами плацентарной недостаточности и нутритивного дефицита.',
+                checkList: [
+                    {text: 'Расширенная оценка нутритивного статуса (биохимия крови, ферритин)', category: 'Диагностика', requiredLevel: 'high'},
+                    {text: 'Коррекция диеты (белковое питание ≥90 г/сут)', category: 'Лечение', requiredLevel: 'high'},
+                    {text: 'Контроль темпов роста плода (УЗ-фетометрия каждые 14 дней)', category: 'Мониторинг', requiredLevel: 'high'}
+                ]
             }
         ];
 
@@ -451,7 +464,9 @@
             let needsProtein = isLowBmi; 
 
             MODELS_CONFIG.forEach(model => {
-                let prob = apiData[`${model.id}_risk`];
+                // Если API не вернул данные для этой модели (например, npf), ставим 0 или обрабатываем ошибку
+                let prob = apiData[`${model.id}_risk`] !== undefined ? apiData[`${model.id}_risk`] : 0;
+                
                 if (prob > 0.99) prob = 0.99;
                 
                 const percent = (prob * 100).toFixed(1) + '%';
@@ -482,7 +497,7 @@
                         <div class="p-3 bg-white/60 border border-gray-200/50 rounded-lg text-[10px] text-[#4B5563] mb-4 leading-tight flex-1">
                             <strong>Обоснование:</strong> ${model.baseRef}
                         </div>
-                        <button onclick="openModal('modal-${model.id}-info')" class="text-[10px] font-bold text-[#3B82F6] uppercase hover:underline text-left">Подробнее о модели ${model.id === 'pe' ? 'ПЭ' : 'ЗРП'} →</button>
+                        <button onclick="openModal('modal-cdss-info')" class="text-[10px] font-bold text-[#3B82F6] uppercase hover:underline text-left">Подробнее о модели →</button>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
@@ -677,9 +692,11 @@
                     
                     let probPE = data.pe_risk; if(probPE > 0.99) probPE = 0.99;
                     let probFGR = data.fgr_risk; if(probFGR > 0.99) probFGR = 0.99;
+                    let probNPF = data.npf_risk !== undefined ? data.npf_risk : 0; if(probNPF > 0.99) probNPF = 0.99;
                     
                     const pePercent = (probPE * 100).toFixed(1);
                     const fgrPercent = (probFGR * 100).toFixed(1);
+                    const npfPercent = (probNPF * 100).toFixed(1);
 
                     // 1. Формирование диагноза и сопутствующих заболеваний (МКБ-10)
                     let diagnosisText = `Беременность ${pWeeks}.`;
@@ -703,18 +720,20 @@
                     // 2. Оценка риска
                     const isHighRiskPE = probPE > 0.57;
                     const isHighRiskFGR = probFGR > 0.39;
+                    const isHighRiskNPF = probNPF > 0.16;
                     
-                    let riskConclusion = "";
-                    if (isHighRiskPE && isHighRiskFGR) riskConclusion = "ВЫСОКИЙ РИСК ПРЕЭКЛАМПСИИ И ЗАДЕРЖКИ РОСТА ПЛОДА.";
-                    else if (isHighRiskPE) riskConclusion = "ВЫСОКИЙ РИСК ПРЕЭКЛАМПСИИ.";
-                    else if (isHighRiskFGR) riskConclusion = "ВЫСОКИЙ РИСК ЗАДЕРЖКИ РОСТА ПЛОДА.";
-                    else riskConclusion = "Низкий риск больших акушерских синдромов.";
+                    let riskConclusion = [];
+                    if (isHighRiskPE) riskConclusion.push("ВЫСОКИЙ РИСК ПРЕЭКЛАМПСИИ");
+                    if (isHighRiskFGR) riskConclusion.push("ВЫСОКИЙ РИСК ЗАДЕРЖКИ РОСТА ПЛОДА");
+                    if (isHighRiskNPF) riskConclusion.push("ВЫСОКИЙ РИСК ЗРП-НМП");
+                    
+                    let riskString = riskConclusion.length > 0 ? riskConclusion.join(", ") : "Низкий риск больших акушерских синдромов.";
                     
                     const bmiText = isWeightKnown ? inputs.bmi : "Неизвестен";
 
                     // 3. План ведения
                     let plan = [];
-                    plan.push(`1. Диспансерное наблюдение: ${isHighRiskPE || isHighRiskFGR ? 'Индивидуальный график (явка каждые 2 недели)' : 'Согласно приказу 1130н'}.`);
+                    plan.push(`1. Диспансерное наблюдение: ${riskConclusion.length > 0 ? 'Индивидуальный график (явка каждые 2 недели)' : 'Согласно приказу 1130н'}.`);
                     
                     if (isHighRiskPE) {
                         plan.push(`2. ПРОФИЛАКТИКА ПЭ (КР 2021):`);
@@ -756,10 +775,11 @@ I. КЛИНИЧЕСКИЙ ДИАГНОЗ (ПРЕДВАРИТЕЛЬНЫЙ):
 ${diagnosisText}${comorbText}
 
 II. ПРОГНОЗ РАЗВИТИЯ ОСЛОЖНЕНИЙ (AI-АНАЛИЗ):
-Заключение: ${riskConclusion}
+Заключение: ${riskString}.
 Детализация расчета:
 - Вероятность ПЭ: ${pePercent}% (Порог отсечки высокого риска: 57%).
 - Вероятность ЗРП: ${fgrPercent}% (Порог отсечки высокого риска: 39%).
+- Вероятность ЗРП-НМП: ${npfPercent}% (Порог отсечки высокого риска: 16%).
 Данные I скрининга: риск ПЭ ${inputs.scr_pe}, риск ЗРП ${inputs.scr_fgr}.
 
 III. РЕКОМЕНДОВАННЫЙ ПЛАН ВЕДЕНИЯ (Согласно КР МЗ РФ):
