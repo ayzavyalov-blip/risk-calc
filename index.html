@@ -343,6 +343,29 @@
         </div>
     </div>
 
+    <div id="modal-or-info" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-[#111827] mb-4 uppercase">Пояснение: Отношение шансов (OR)</h2>
+            <div class="space-y-4 text-sm leading-relaxed text-[#374151]">
+                <p><strong>Отношение шансов (Odds Ratio, OR)</strong> — это статистическая мера, описывающая силу связи между фактором риска и исходом.</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>OR > 1:</strong> Фактор повышает риск. Например, OR = 4.1 означает, что наличие фактора (напр., ПЭ в анамнезе) увеличивает шансы развития патологии в 4.1 раза по сравнению с его отсутствием.</li>
+                    <li><strong>OR < 1:</strong> Фактор имеет "защитный" эффект (снижает риск).</li>
+                    <li><strong>OR = 1:</strong> Фактор не влияет на исход.</li>
+                </ul>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
+                    [cite_start]<p class="font-bold mb-2 text-[#111827]">Примеры из исследования[cite: 236]:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-[#4B5563]">
+                        <li><strong>Гестационная АГ:</strong> aOR 6.6 (95% ДИ 2.0-20.0) — мощный предиктор ЗРП.</li>
+                        <li><strong>Хроническая АГ:</strong> aOR 5.3 (95% ДИ 1.04-25.0).</li>
+                        <li><strong>Прибавка веса:</strong> aOR 0.77 (каждый кг снижает риск на 23%).</li>
+                    </ul>
+                </div>
+            </div>
+            <button onclick="closeModal('modal-or-info')" class="mt-6 w-full py-3 bg-[#1F2937] text-white rounded-lg font-bold uppercase text-xs hover:bg-black transition">Закрыть</button>
+        </div>
+    </div>
+
    <script>
         // === КОНФИГУРАЦИЯ API И МОДЕЛЕЙ ===
         const API_URL = "https://bbao7sb3qb98qg2cso0r.containers.yandexcloud.net/predict";
@@ -351,7 +374,7 @@
             {
                 id: 'pe',
                 title: 'Преэклампсия (ПЭ)',
-                crRef: 'КР МЗ РФ «Преэклампсия...» (2021)',
+                crRef: 'Клинические рекомендации Преэклампсия. Эклампсия. Отеки, протеинурия и гипертензивные расстройства во время беременности, в родах и послеродовом периоде. (Утв. Минздравом России, 2023 г.)',
                 threshold: 0.57, 
                 thresholdSevere: 0.80,
                 baseRef: 'Раздел 5 «Профилактика», Раздел 3 «Диагностика».',
@@ -367,7 +390,7 @@
             {
                 id: 'fgr',
                 title: 'Задержка роста плода (ЗРП)',
-                crRef: 'КР МЗ РФ «Задержка роста плода» (2024)',
+                crRef: 'Клинические рекомендации Недостаточный рост плода, требующий предоставления медицинской помощи матери (задержка роста плода). (Утв. Минздравом России 14.02.2022, ID 722).',
                 threshold: 0.39,
                 thresholdSevere: 0.70,
                 baseRef: 'Раздел 2.4 «Инструментальные исследования».',
@@ -381,7 +404,7 @@
             {
                 id: 'npf',
                 title: 'ЗРП-НМП (Нутритивно-метаболический фенотип)',
-                crRef: 'КР МЗ РФ «Недостаточный рост плода...» (2024)',
+                crRef: 'Клинические рекомендации Недостаточный рост плода... (2022) и Клинические рекомендации Нормальная беременность (2024).',
                 threshold: 0.16,
                 thresholdSevere: 0.50,
                 baseRef: 'Фенотип с маркерами плацентарной недостаточности и нутритивного дефицита.',
@@ -394,7 +417,6 @@
         ];
 
         // Правила для блока "Персональные драйверы риска"
-        // ПРАВКА: Если ИМТ не известен (т.е. мы его не считаем), правило obesity не сработает
         const RISK_FACTORS_RULES = [
             { id: 'obesity', label: 'Индекс массы тела (Ожирение)', or: 3.5, check: (i) => i.weightKnown && i.bmi >= 30 },
             { id: 'hag', label: 'Наличие хронической артериальной гипертензии', or: 2.8, check: (i) => i.hag == 'Да' },
@@ -412,7 +434,6 @@
         function renderRiskFactorsBlock(inputs, heightClass) {
             const activeFactors = RISK_FACTORS_RULES.filter(rule => rule.check(inputs));
             
-            // Если факторов нет, выводим сообщение
             let contentHTML = '';
             if (activeFactors.length === 0) {
                 contentHTML = '<p class="text-sm text-gray-300 italic">Специфических факторов высокого риска не выявлено</p>';
@@ -440,7 +461,7 @@
                         <h3 class="text-xs font-bold flex items-center uppercase tracking-tight text-white">
                             Ведущие факторы риска
                         </h3>
-                        <span class="text-[9px] bg-gray-700 px-2 py-0.5 rounded text-gray-300">Отношение шансов</span>
+                        <span onclick="openModal('modal-or-info')" class="text-[9px] bg-gray-700 px-2 py-0.5 rounded text-gray-300 cursor-pointer hover:bg-gray-600 transition" title="Нажмите для подробной информации">Отношение шансов</span>
                     </div>
                     <div class="flex-1 overflow-y-auto pr-1">
                         ${contentHTML}
@@ -456,13 +477,13 @@
             const bgColor = isHigh ? 'bg-[#FEF2F2]' : 'bg-[#ECFDF5]';
             const borderColor = isHigh ? 'border-[#EF4444]' : 'border-[#10B981]';
             const textColor = isHigh ? 'text-[#EF4444]' : 'text-[#10B981]';
-            const badgeText = isHigh ? 'ВЫСОКИЙ' : 'НИЗКИЙ';
+            const badgeText = isHigh ? 'ВЫСОКИЙ РИСК' : 'НИЗКИЙ РИСК';
             const icon = isHigh ? '⚠️' : '🛡️';
 
             return `
-                <div class="${heightClass} ${bgColor} border-l-4 ${borderColor} p-3 rounded-2xl shadow-md flex flex-col justify-between fade-in">
+                <div class="${heightClass} ${bgColor} border-l-4 ${borderColor} p-2 rounded-2xl shadow-md flex flex-col justify-between fade-in">
                     <div class="flex justify-between items-start">
-                        <h4 class="font-bold text-[#111827] uppercase text-[10px] tracking-wider leading-tight w-2/3">${model.title}</h4>
+                        <h4 class="font-bold text-[#111827] uppercase text-sm tracking-wider leading-tight w-2/3">${model.title}</h4>
                         <div class="flex flex-col items-end gap-0.5">
                             <span class="font-bold text-[9px] uppercase flex items-center gap-1 ${textColor}">
                                 ${icon} ${badgeText}
@@ -471,14 +492,15 @@
                         </div>
                     </div>
                     
-                    <div class="text-3xl font-black ${textColor} leading-none tracking-tight">
+                    <div class="text-3xl font-black ${textColor} leading-none tracking-tight mt-1 mb-1">
                         ${percent}
                     </div>
                     
                     <div class="flex justify-between items-end mt-1">
-                        <p class="text-[9px] text-[#6B7280] leading-tight w-3/4 truncate pr-2">
+                        <div class="text-[9px] text-[#6B7280] leading-tight w-3/4 pr-2">
+                            <span class="font-bold block mb-0.5">${model.crRef}</span>
                             ${model.baseRef}
-                        </p>
+                        </div>
                         <button onclick="openModal('modal-${model.id}-info')" class="text-[9px] font-bold text-[#3B82F6] hover:underline whitespace-nowrap">Инфо →</button>
                     </div>
                 </div>
@@ -501,12 +523,13 @@
             let needsProtein = isLowBmi;
 
             // 1. Формируем стек HTML (Факторы + 3 карточки)
-            let stackHTML = '<div class="flex flex-col h-[800px] w-full gap-2 mb-2">';
+            // Используем h-auto для динамической высоты
+            let stackHTML = '<div class="flex flex-col h-auto w-full gap-2 mb-2">';
             
-            // Блок 1: Факторы риска (40%)
-            stackHTML += renderRiskFactorsBlock(userInputs, "h-[40%]");
+            // Блок 1: Факторы риска (h-auto или min-h)
+            stackHTML += renderRiskFactorsBlock(userInputs, "min-h-[150px]");
 
-            // Блоки 2-4: Модели (20% каждая)
+            // Блоки 2-4: Модели (h-auto)
             MODELS_CONFIG.forEach(model => {
                 let prob = apiData[`${model.id}_risk`] !== undefined ? apiData[`${model.id}_risk`] : 0;
                 if (prob > 0.99) prob = 0.99;
@@ -516,9 +539,8 @@
                 
                 if (isHigh) {
                     hasAnyHighRisk = true;
-                    needsProtein = true; // Высокий риск -> нужно питание
+                    needsProtein = true; 
                     
-                    // Сбор рекомендаций для нижнего блока
                     const grouped = {};
                     model.checkList.forEach(item => {
                         if (!grouped[item.category]) grouped[item.category] = [];
@@ -557,8 +579,8 @@
                     `;
                 }
 
-                // Добавляем карточку в стек (20%)
-                stackHTML += renderCompactCard(model, prob, isHigh, isSevere, "h-[20%]");
+                // Добавляем карточку в стек (min-h-[120px] для компактности)
+                stackHTML += renderCompactCard(model, prob, isHigh, isSevere, "min-h-[120px]");
             });
 
             stackHTML += '</div>'; // Закрываем стек
@@ -599,7 +621,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // === ЛОГИКА ИНТЕРФЕЙСА ===
             const inpParity = document.getElementById('inp-parity');
             const inpInterval = document.getElementById('inp-interval');
             const inpWeightKnown = document.getElementById('inp-weight-known');
@@ -609,7 +630,6 @@
             const gagLabel = document.getElementById('gag-label');
             const gagContainer = document.getElementById('gag-container');
 
-            // 1. Интервал
             inpParity.addEventListener('input', () => {
                 if (parseInt(inpParity.value) === 0) {
                     inpInterval.value = 'none';
@@ -620,7 +640,6 @@
                 }
             });
 
-            // 2. Вес
             inpWeightKnown.addEventListener('change', () => {
                 if (inpWeightKnown.checked) {
                     weightFields.classList.remove('opacity-50', 'pointer-events-none');
@@ -630,7 +649,6 @@
                 }
             });
 
-            // 3. ГАГ
             const updateGagState = () => {
                 if (inpWeeks.selectedIndex >= 5) {
                     inpGag.disabled = false;
@@ -654,7 +672,6 @@
             const doctorComment = document.getElementById('doctor-comment');
             
             trigger.addEventListener('click', async () => {
-                // ВАЛИДАЦИЯ ВОЗРАСТА
                 const ageVal = parseInt(document.getElementById('inp-age').value);
                 if (ageVal < 15 || ageVal > 50) {
                     document.getElementById('age-error').classList.remove('hidden');
@@ -717,7 +734,6 @@
                     const fgrPercent = (probFGR * 100).toFixed(1);
                     const npfPercent = (probNPF * 100).toFixed(1);
 
-                    // 1. Диагноз
                     let diagnosisText = `Беременность ${pWeeks}.`;
                     let comorbidities = [];
                     
@@ -736,7 +752,6 @@
 
                     const comorbText = comorbidities.length > 0 ? `\nСопутствующие: ${comorbidities.join(', ')}.` : "";
 
-                    // 2. Риски
                     const isHighRiskPE = probPE > 0.57;
                     const isHighRiskFGR = probFGR > 0.39;
                     const isHighRiskNPF = probNPF > 0.16;
@@ -749,7 +764,6 @@
                     let riskString = riskConclusion.length > 0 ? riskConclusion.join(", ") : "Низкий риск больших акушерских синдромов.";
                     const bmiText = isWeightKnown ? inputs.bmi : "Неизвестен";
 
-                    // 3. План
                     let plan = [];
                     plan.push(`1. Диспансерное наблюдение: ${riskConclusion.length > 0 ? 'Индивидуальный график (явка каждые 2 недели)' : 'Согласно приказу 1130н'}.`);
                     
